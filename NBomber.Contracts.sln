@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "NBomber.Contracts", "src\NBomber.Contracts\NBomber.Contracts.fsproj", "{1223FB48-AB5A-4DB6-B124-906F21C5CD8F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1223FB48-AB5A-4DB6-B124-906F21C5CD8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1223FB48-AB5A-4DB6-B124-906F21C5CD8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1223FB48-AB5A-4DB6-B124-906F21C5CD8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1223FB48-AB5A-4DB6-B124-906F21C5CD8F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

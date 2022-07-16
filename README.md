@@ -1,2 +1,2 @@
 # NBomber.Contracts
-Public contracts of NBomber
+Public contracts for NBomber
