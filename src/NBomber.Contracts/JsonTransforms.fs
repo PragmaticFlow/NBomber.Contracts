@@ -1,6 +1,5 @@
 ﻿namespace NBomber.Contracts.Internal.Serialization.JsonTransforms
 
-open System
 open System.Data
 open FSharp.Json
 
@@ -53,9 +52,3 @@ type DateTableTransform() =
                 )
 
             data
-
-type TimeSpanTransform() =
-    interface ITypeTransform with
-        member x.targetType() = typeof<string>
-        member this.fromTargetType(value) = TimeSpan.Parse(value :?> string)
-        member this.toTargetType(value) = string(value :?> TimeSpan)

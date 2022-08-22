@@ -120,7 +120,7 @@ type StepStatsData = {
 [<CLIMutable>]
 [<MessagePackObject>]
 type StepInfo = {
-    [<Key 0>] [<JsonField(Transform=typeof<TimeSpanTransform>)>] Timeout: TimeSpan
+    [<Key 0>] Timeout: TimeSpan
     [<Key 1>] ClientFactoryName: string
     [<Key 2>] ClientFactoryClientCount: int
     [<Key 3>] FeedName: string
@@ -155,7 +155,7 @@ type ScenarioStats = {
     [<Key 7>] LoadSimulationStats: LoadSimulationStats
     [<Key 8>] StatusCodes: StatusCodeStats[]
     [<Key 9>] CurrentOperation: OperationType
-    [<Key 10>] [<JsonField(Transform=typeof<TimeSpanTransform>)>] Duration: TimeSpan
+    [<Key 10>] Duration: TimeSpan
 } with
 
     member this.GetStepStats(stepName: string) = ScenarioStats.getStepStats stepName this
@@ -182,7 +182,7 @@ type NodeStats = {
     [<Key 6>] NodeInfo: NodeInfo
     [<Key 7>] TestInfo: TestInfo
     [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 9>] [<JsonField(Transform=typeof<TimeSpanTransform>)>] Duration: TimeSpan
+    [<Key 9>] Duration: TimeSpan
 } with
 
     member this.GetScenarioStats(scenarioName: string) = NodeStats.getScenarioStats scenarioName this
@@ -201,7 +201,7 @@ type NodeStats = {
 
 type TimeLineHistoryRecord = {
     ScenarioStats: ScenarioStats[]
-    [<JsonField(Transform=typeof<TimeSpanTransform>)>] Duration: TimeSpan
+    Duration: TimeSpan
 }
 
 [<JsonField(EnumValue = EnumMode.Value)>]
