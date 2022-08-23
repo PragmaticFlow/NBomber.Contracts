@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <Authors>Anton Moldovan</Authors>
         <Company>NBomber</Company>
-        <Version>3.0.0-rc3</Version>
+        <Version>3.0.0</Version>
         <Copyright>NBomber@2022</Copyright>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -14,6 +14,7 @@
         <PackageTags>load-testing, performance-testing, integration-testing, fsharp</PackageTags>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Description>Public contracts for NBomber</Description>
+        <Title>NBomber.Contracts</Title>
     </PropertyGroup>
 
     <ItemGroup>
