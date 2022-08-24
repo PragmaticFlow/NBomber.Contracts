@@ -84,7 +84,7 @@ type IStepContext<'TClient,'TFeedItem> =
     /// Use it when you don't see any sense to continue the current test.
     abstract StopCurrentTest: reason:string -> unit
 
-type IStepExecControlContext =
+type IStepInterceptionContext =
     abstract PrevStepContext: IStepContext<obj,obj>
     abstract PrevStepResponse: Response
 
@@ -143,7 +143,7 @@ type Scenario = {
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
     CustomStepOrder: (unit -> string[]) option
-    CustomStepExecControl: (IStepExecControlContext voption -> string voption) option
+    StepInterception: (IStepInterceptionContext voption -> string voption) option
 }
 
 type IReportingSink =
