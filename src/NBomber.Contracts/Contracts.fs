@@ -88,7 +88,7 @@ type IStepInterceptionContext =
     abstract PrevStepContext: IStepContext<obj,obj>
     abstract PrevStepResponse: Response
 
-type IStepClientContext<'TFeedItem> =
+type IClientInterceptionContext<'TFeedItem> =
     abstract StepName: string
     abstract ScenarioInfo: ScenarioInfo
     abstract Logger: ILogger
@@ -143,7 +143,7 @@ type Scenario = {
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
     CustomStepOrder: (unit -> string[]) option
-    StepInterception: (IStepInterceptionContext voption -> string voption) option
+    StepInterceptionHandler: (IStepInterceptionContext voption -> string voption) option
 }
 
 type IReportingSink =
