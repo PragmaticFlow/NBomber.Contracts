@@ -74,7 +74,7 @@ type IStepContext<'TClient,'TFeedItem> =
     /// NBomber's logger.
     abstract Logger: ILogger
     /// Returns the invocations number of the current step instance located in the current scenario instance.
-    abstract InvocationCount: int
+    abstract InvocationNumber: int
     /// Returns response from previous step.
     abstract GetPreviousStepResponse: unit -> 'T
     /// Stops scenario by scenario name.
@@ -90,11 +90,11 @@ type IStepInterceptionContext =
 
 type IClientInterceptionContext<'TFeedItem> =
     abstract StepName: string
-    abstract ScenarioInfo: ScenarioInfo
+    abstract StepInvocationNumber: int
+    abstract ScenarioInfo: ScenarioInfo    
     abstract Logger: ILogger
     abstract Data: Dictionary<string,obj>
-    abstract FeedItem: 'TFeedItem
-    abstract InvocationNumber: int
+    abstract FeedItem: 'TFeedItem    
     abstract ClientCount: int
 
 type IScenarioContext =
@@ -143,7 +143,7 @@ type Scenario = {
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
     CustomStepOrder: (unit -> string[]) option
-    StepInterceptionHandler: (IStepInterceptionContext voption -> string voption) option
+    StepInterception: (IStepInterceptionContext voption -> string voption) option
 }
 
 type IReportingSink =
