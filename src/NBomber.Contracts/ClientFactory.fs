@@ -1,42 +1,56 @@
 ﻿namespace NBomber.Contracts
 
+open System.Collections.Generic
 open System.Threading.Tasks
 
-module internal Constants =
+type IClientFactory<'TClient> =
+    abstract FactoryName: string    
+    abstract ClientCount: int
+    abstract InitializedClients: IReadOnlyList<'TClient>
     
-    [<Literal>]
-    let DefaultClientCount = 1
+type internal IUntypedClientFactory =
+    abstract FactoryName: string    
+    abstract ClientCount: int
+    abstract SetName: name:string -> unit
+    abstract SetClientCount: count:int -> unit
+    abstract GetClient: number:int -> obj
+    abstract InitClient: number:int * context:IBaseContext -> Task<unit>
+    abstract DisposeClient: number:int * context:IBaseContext -> Task    
 
-type ClientFactory<'TClient>(name: string,
-                             clientCount: int,
-                             initClient: int * IBaseContext -> Task<'TClient>, // number * context
-                             disposeClient: 'TClient * IBaseContext -> Task) =
+type internal ClientFactory<'TClient>(name: string,
+                                      clientCount: int,
+                                      initClient: int * IBaseContext -> Task<'TClient>, // number * context
+                                      disposeClient: 'TClient * IBaseContext -> Task) =
 
-    // we use lazy to prevent multiply initialization in one scenario
-    // also, we do check on duplicates (that has the same name but different implementation) within one scenario
-    let untypedFactory = lazy (
-        ClientFactory<obj>(name, clientCount,
-            initClient = (fun (number,token) -> task {
-                let! client = initClient(number, token)
-                return client :> obj
-            }),
-            disposeClient = (fun (client,context) -> disposeClient(client :?> 'TClient, context))
-        )
-    )
+    let mutable _factoryName = name
+    let mutable _clientCount = clientCount
+    let _initializedClients = ResizeArray<_>()
 
-    member _.FactoryName = name
-    member _.ClientCount = clientCount
+    interface IClientFactory<'TClient> with
+        member _.FactoryName = _factoryName
+        member _.ClientCount = _clientCount
+        member _.InitializedClients = _initializedClients :> IReadOnlyList<_>
     
-    member internal _.GetUntyped() = untypedFactory.Value
-    member internal _.Clone(newName: string) = ClientFactory<'TClient>(newName, clientCount, initClient, disposeClient)
-    member internal _.Clone(newClientCount: int) = ClientFactory<'TClient>(name, newClientCount, initClient, disposeClient)
-    member internal _.InitClient(number, context) = initClient(number, context)
-    member internal _.DisposeClient(client, context) = disposeClient(client, context)
+    interface IUntypedClientFactory with
+        member _.FactoryName = _factoryName
+        member _.ClientCount = _clientCount
+        member _.SetName(name) = _factoryName <- name
+        member _.SetClientCount(count) = _clientCount <- count
+        member _.GetClient(number) = _initializedClients[number]
+        
+        member _.InitClient(number, context) = task {
+            let! client = initClient(number, context)
+            _initializedClients.Add client
+        }
+        
+        member _.DisposeClient(number, context) = task {
+            let client = _initializedClients[number]
+            do! disposeClient(client, context)
+        }
     
 namespace NBomber.FSharp
 
 open System
-open System.Runtime.InteropServices
 open System.Threading.Tasks
 open NBomber.Contracts
 
@@ -49,7 +63,7 @@ type ClientFactory =
     static member create (name: string,
                           initClient: int * IBaseContext -> Task<'TClient>,
                           ?disposeClient: 'TClient * IBaseContext -> Task<unit>,
-                          [<Optional;DefaultParameterValue(Constants.DefaultClientCount)>] ?clientCount: int) =
+                          ?clientCount: int) =
 
         let defaultDispose = (fun (client,context) ->
             match client :> obj with
@@ -63,8 +77,8 @@ type ClientFactory =
             |> Option.map(fun dispose -> fun (c,ctx) -> dispose(c,ctx) :> Task)
             |> Option.defaultValue defaultDispose        
         
-        let count = defaultArg clientCount Constants.DefaultClientCount
-        ClientFactory(name, count, initClient, dispose)
+        let count = defaultArg clientCount 1
+        ClientFactory(name, count, initClient, dispose) :> IClientFactory<_>
         
 namespace NBomber.CSharp
 
@@ -82,7 +96,7 @@ type ClientFactory =
         (name: string,
          initClient: Func<int,IBaseContext,Task<'TClient>>,
          [<Optional;DefaultParameterValue(null)>] disposeClient: Func<'TClient,IBaseContext,Task>,
-         [<Optional;DefaultParameterValue(Constants.DefaultClientCount)>] clientCount: int) =
+         [<Optional;DefaultParameterValue(1)>] clientCount: int) =
 
         let defaultDispose = (fun (client,context) ->
             match client :> obj with
@@ -95,4 +109,4 @@ type ClientFactory =
             if isNull(disposeClient :> obj) then defaultDispose
             else disposeClient.Invoke
 
-        ClientFactory(name, clientCount, initClient.Invoke, dispose)
+        ClientFactory(name, clientCount, initClient.Invoke, dispose) :> IClientFactory<_>

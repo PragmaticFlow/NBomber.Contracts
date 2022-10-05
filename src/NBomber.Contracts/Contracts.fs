@@ -88,15 +88,6 @@ type IStepInterceptionContext =
     abstract PrevStepContext: IStepContext<obj,obj>
     abstract PrevStepResponse: Response
 
-type IClientInterceptionContext<'TFeedItem> =
-    abstract StepName: string
-    abstract StepInvocationNumber: int
-    abstract ScenarioInfo: ScenarioInfo    
-    abstract Logger: ILogger
-    abstract Data: Dictionary<string,obj>
-    abstract FeedItem: 'TFeedItem    
-    abstract ClientCount: int
-
 type IScenarioContext =
     /// Gets current test info
     abstract TestInfo: TestInfo
