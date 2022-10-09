@@ -63,12 +63,14 @@ type IStepContext<'TClient,'TFeedItem> =
     /// You can use ScenarioInfo.ThreadId as correlation id.
     abstract ScenarioInfo: ScenarioInfo
     /// Cancellation token is a standard mechanics for canceling long-running operations.
-    /// Cancellation token should be used to help NBomber stop scenarios when the test is finished.
+    /// Cancellation token should be used to help NBomber stop running steps when the test is finished.
     abstract CancellationToken: CancellationToken
-    /// Client which is taken from the ClientPool.
-    abstract Client: 'TClient
+    /// Represent a current step's client instance that is taken from the ClientFactory.     
+    abstract Client: 'TClient    
     /// Step's dictionary which you can use to share data between steps (within one scenario).
     abstract Data: Dictionary<string,obj>
+    /// Gets data item from Data dictionary by key.  
+    abstract GetFromData: key:string -> 'T
     /// Feed item taken from attached feed.
     abstract FeedItem: 'TFeedItem
     /// NBomber's logger.
