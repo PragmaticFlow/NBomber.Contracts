@@ -56,6 +56,16 @@ type IFeed<'TFeedItem> =
     abstract Init: context:IBaseContext -> Task
     abstract GetNextItem: scenarioInfo:ScenarioInfo * stepData:Dictionary<string,obj> -> 'TFeedItem
 
+type IUntypedStepContext =
+    abstract Logger: ILogger
+    abstract StepName: string
+    abstract ScenarioInfo: ScenarioInfo    
+    abstract CancellationTokenSource: CancellationTokenSource with get, set
+    abstract Client: obj with get,set
+    abstract Data: Dictionary<string,obj> with get, set
+    abstract FeedItem: obj with get, set
+    abstract InvocationNumber: int with get, set
+
 type IStepContext<'TClient,'TFeedItem> =
     /// Gets the currently running step name.
     abstract StepName: string
@@ -66,7 +76,8 @@ type IStepContext<'TClient,'TFeedItem> =
     /// Cancellation token should be used to help NBomber stop running steps when the test is finished.
     abstract CancellationToken: CancellationToken
     /// Represent a current step's client instance that is taken from the ClientFactory.     
-    abstract Client: 'TClient    
+    abstract Client: 'TClient
+    // abstract Pool.Client: 'TClient
     /// Step's dictionary which you can use to share data between steps (within one scenario).
     abstract Data: Dictionary<string,obj>
     /// Gets data item from Data dictionary by key.  
@@ -87,7 +98,7 @@ type IStepContext<'TClient,'TFeedItem> =
     abstract StopCurrentTest: reason:string -> unit
 
 type IStepInterceptionContext =
-    abstract PrevStepContext: IStepContext<obj,obj>
+    abstract PrevStepContext: IUntypedStepContext
     abstract PrevStepResponse: Response
 
 type IScenarioContext =
