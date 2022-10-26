@@ -1,28 +1,92 @@
 namespace NBomber.Contracts
 
 open System
-open System.Collections.Generic
 open System.Data
 open System.Runtime.InteropServices
 open System.Threading
 open System.Threading.Tasks
 
 open Serilog
-open MessagePack
 open Microsoft.Extensions.Configuration
 
 open NBomber.Contracts.Stats
 
-[<CLIMutable>]
-[<MessagePackObject>]
-type Response = {
-    [<Key 0>] StatusCode: Nullable<int>
-    [<Key 1>] IsError: bool
-    [<Key 2>] SizeBytes: int
-    [<Key 3>] LatencyMs: float
-    [<IgnoreMember>] Message: string
-    [<IgnoreMember>] Payload: obj
-}
+type IResponse =
+    abstract StatusCode: string
+    abstract IsError: bool
+    abstract SizeBytes: int
+    abstract LatencyMs: float
+    abstract Message: string     
+
+type Response<'T> = {
+    StatusCode: string
+    IsError: bool
+    SizeBytes: int
+    LatencyMs: float
+    Message: string
+    Payload: 'T option
+} with
+    interface IResponse with
+        member x.StatusCode = x.StatusCode
+        member x.IsError = x.IsError
+        member x.LatencyMs = x.LatencyMs
+        member x.Message = x.Message
+        member x.SizeBytes = x.SizeBytes
+        
+type Response =        
+        
+    [<CompiledName("Ok")>]
+    static member ok([<Optional;DefaultParameterValue("")>] statusCode: string,
+                     [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
+                     [<Optional;DefaultParameterValue(0.0)>] latencyMs: float,
+                     [<Optional;DefaultParameterValue("")>] message: string): Response<obj> =
+        
+        { StatusCode = statusCode
+          IsError = false
+          SizeBytes = sizeBytes
+          Message = if isNull message then String.Empty else message
+          LatencyMs = latencyMs
+          Payload = None }
+    
+    [<CompiledName("Ok")>]
+    static member ok<'T>(payload: 'T,
+                         [<Optional;DefaultParameterValue("")>] statusCode: string,
+                         [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
+                         [<Optional;DefaultParameterValue(0.0)>] latencyMs: float,
+                         [<Optional;DefaultParameterValue("")>] message: string): Response<'T> =
+
+        { StatusCode = statusCode
+          IsError = false
+          SizeBytes = sizeBytes
+          Message = if isNull message then String.Empty else message
+          LatencyMs = latencyMs
+          Payload = Some payload }
+        
+    [<CompiledName("Fail")>]
+    static member fail([<Optional;DefaultParameterValue("")>] error: string,
+                       [<Optional;DefaultParameterValue("")>] statusCode: string,
+                       [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
+                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float): Response<obj> =
+
+        { StatusCode = statusCode
+          IsError = true
+          SizeBytes = sizeBytes
+          Message = if isNull error then String.Empty else error
+          LatencyMs = latencyMs
+          Payload = None }
+        
+    [<CompiledName("Fail")>]
+    static member fail(error: Exception,
+                       [<Optional;DefaultParameterValue("")>] statusCode: string,
+                       [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
+                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float): Response<obj> =        
+    
+        { StatusCode = statusCode
+          IsError = true
+          SizeBytes = sizeBytes
+          Message = if isNull error then String.Empty else error.Message
+          LatencyMs = latencyMs
+          Payload = None }
 
 type ScenarioOperation =
     | WarmUp = 0
@@ -51,57 +115,15 @@ type IBaseContext =
     /// NBomber's logger
     abstract Logger: ILogger
 
-type IFeed<'TFeedItem> =
-    abstract FeedName: string
-    abstract Init: context:IBaseContext -> Task
-    abstract GetNextItem: scenarioInfo:ScenarioInfo * stepData:Dictionary<string,obj> -> 'TFeedItem
-
-type IUntypedStepContext =
-    abstract Logger: ILogger
-    abstract StepName: string
-    abstract ScenarioInfo: ScenarioInfo    
-    abstract CancellationTokenSource: CancellationTokenSource with get, set
-    abstract Client: obj with get,set
-    abstract Data: Dictionary<string,obj> with get, set
-    abstract FeedItem: obj with get, set
-    abstract InvocationNumber: int with get, set
-
-type IStepContext<'TClient,'TFeedItem> =
-    /// Gets the currently running step name.
-    abstract StepName: string
-    /// Gets info about the currently running scenario.
-    /// You can use ScenarioInfo.ThreadId as correlation id.
+type IScenarioContext =    
     abstract ScenarioInfo: ScenarioInfo
-    /// Cancellation token is a standard mechanics for canceling long-running operations.
-    /// Cancellation token should be used to help NBomber stop running steps when the test is finished.
-    abstract CancellationToken: CancellationToken
-    /// Represent a current step's client instance that is taken from the ClientFactory.     
-    abstract Client: 'TClient
-    // abstract Pool.Client: 'TClient
-    /// Step's dictionary which you can use to share data between steps (within one scenario).
-    abstract Data: Dictionary<string,obj>
-    /// Gets data item from Data dictionary by key.  
-    abstract GetFromData: key:string -> 'T
-    /// Feed item taken from attached feed.
-    abstract FeedItem: 'TFeedItem
-    /// NBomber's logger.
     abstract Logger: ILogger
-    /// Returns the invocations number of the current step instance located in the current scenario instance.
-    abstract InvocationNumber: int
-    /// Returns response from previous step.
-    abstract GetPreviousStepResponse: unit -> 'T
-    /// Stops scenario by scenario name.
-    /// It could be useful when you don't know the final scenario duration or it depends on some other criteria (notification event etc).
+    abstract CancellationToken: CancellationToken
+    abstract InvocationNumber: int    
     abstract StopScenario: scenarioName:string * reason:string -> unit
-    /// Stops all running scenarios.
-    /// Use it when you don't see any sense to continue the current test.
     abstract StopCurrentTest: reason:string -> unit
 
-type IStepInterceptionContext =
-    abstract PrevStepContext: IUntypedStepContext
-    abstract PrevStepResponse: Response
-
-type IScenarioContext =
+type IScenarioInitContext =
     /// Gets current test info
     abstract TestInfo: TestInfo
     /// Gets current node info
@@ -113,10 +135,6 @@ type IScenarioContext =
     abstract CancellationToken: CancellationToken
     /// NBomber's logger
     abstract Logger: ILogger
-
-type IStep =
-    abstract StepName: string
-    abstract DoNotTrack: bool
 
 type LoadSimulation =
     /// Injects a given number of scenario copies (threads) with a linear ramp over a given duration.
@@ -139,15 +157,14 @@ type LoadSimulation =
     /// Use it when you want to maintain a random rate of requests without being affected by the performance of the system under test.
     | InjectPerSecRandom of minRate:int * maxRate:int * during:TimeSpan
 
-type Scenario = {
+type ScenarioProps = {
     ScenarioName: string
-    Init: (IScenarioContext -> Task) option
-    Clean: (IScenarioContext -> Task) option
-    Steps: IStep list
+    Init: (IScenarioInitContext -> Task) option
+    Clean: (IScenarioInitContext -> Task) option
+    Run: (IScenarioContext -> Task<Response<obj>>) option
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
-    CustomStepOrder: (unit -> string[]) option
-    StepInterception: (IStepInterceptionContext voption -> string voption) option
+    ResetIterationOnFail: bool
 }
 
 type IReportingSink =
@@ -171,58 +188,22 @@ type IWorkerPlugin =
 type ApplicationType =
     | Process = 0
     | Console = 1
-
-type Response with
-
-    [<CompiledName("Ok")>]
-    static member ok([<Optional;DefaultParameterValue(null)>] payload: obj,
-                     [<Optional;DefaultParameterValue(Nullable<int>())>] statusCode: Nullable<int>,
-                     [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                     [<Optional;DefaultParameterValue(0.0)>] latencyMs: float,
-                     [<Optional;DefaultParameterValue("")>] message: string) =
-
-        { StatusCode = statusCode
-          IsError = false
-          SizeBytes = sizeBytes
-          Message = if isNull message then String.Empty else message
-          LatencyMs = latencyMs
-          Payload = payload }
-
-    [<CompiledName("Ok")>]
-    static member ok(payload: byte[],
-                     [<Optional;DefaultParameterValue(Nullable<int>())>] statusCode: Nullable<int>,
-                     [<Optional;DefaultParameterValue(0.0)>] latencyMs: float,
-                     [<Optional;DefaultParameterValue("")>] message: string) =
-
-        { StatusCode = statusCode
-          IsError = false
-          SizeBytes = if isNull payload then 0 else payload.Length
-          Message = if isNull message then String.Empty else message
-          LatencyMs = latencyMs
-          Payload = payload }
-
-    [<CompiledName("Fail")>]
-    static member fail([<Optional;DefaultParameterValue("")>] error: string,
-                       [<Optional;DefaultParameterValue(Nullable<int>())>] statusCode: Nullable<int>,
-                       [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) =
-
-        { StatusCode = statusCode
+        
+module internal ResponseInternal =
+    
+    let emptyFail<'T> : Response<'T> =
+        { StatusCode = ""
           IsError = true
-          SizeBytes = sizeBytes
-          Message = if isNull error then String.Empty else error
-          LatencyMs = latencyMs
-          Payload = null }
-
-    [<CompiledName("Fail")>]
-    static member fail(error: Exception,
-                       [<Optional;DefaultParameterValue(Nullable<int>())>] statusCode: Nullable<int>,
-                       [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) =
-
-        { StatusCode = statusCode
+          SizeBytes = 0
+          Message = String.Empty
+          LatencyMs = 0
+          Payload = None }
+        
+    
+    let fail (error: Exception) : Response<'T> =
+        { StatusCode = ""
           IsError = true
-          SizeBytes = sizeBytes
+          SizeBytes = 0
           Message = if isNull error then String.Empty else error.Message
-          LatencyMs = latencyMs
-          Payload = null }
+          LatencyMs = 0
+          Payload = None }

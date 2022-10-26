@@ -22,7 +22,6 @@
         <Compile Include="JsonTransforms.fs" />
         <Compile Include="Stats.fs" />
         <Compile Include="Contracts.fs" />
-        <Compile Include="ClientFactory.fs" />
     </ItemGroup>
 
     <ItemGroup>

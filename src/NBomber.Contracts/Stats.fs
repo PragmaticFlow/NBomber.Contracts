@@ -59,7 +59,7 @@ type NodeInfo = {
 [<CLIMutable>]
 [<MessagePackObject>]
 type StatusCodeStats = {
-    [<Key 0>] StatusCode: int
+    [<Key 0>] StatusCode: string
     [<Key 1>] IsError: bool
     [<Key 2>] Message: string
     [<Key 3>] Count: int
@@ -110,7 +110,7 @@ type DataTransferStats = {
 
 [<CLIMutable>]
 [<MessagePackObject>]
-type StepStatsData = {
+type MeasurementStats = {
     [<Key 0>] Request: RequestStats
     [<Key 1>] Latency: LatencyStats
     [<Key 2>] DataTransfer: DataTransferStats
@@ -121,17 +121,14 @@ type StepStatsData = {
 [<MessagePackObject>]
 type StepInfo = {
     [<Key 0>] Timeout: TimeSpan
-    [<Key 1>] ClientFactoryName: string
-    [<Key 2>] ClientFactoryClientCount: int
-    [<Key 3>] FeedName: string
 }
 
 [<CLIMutable>]
 [<MessagePackObject>]
 type StepStats = {
     [<Key 0>] StepName: string
-    [<Key 1>] Ok: StepStatsData
-    [<Key 2>] Fail: StepStatsData
+    [<Key 1>] Ok: MeasurementStats
+    [<Key 2>] Fail: MeasurementStats
     [<Key 3>] StepInfo: StepInfo
 }
 
@@ -145,17 +142,13 @@ type LoadSimulationStats = {
 [<CLIMutable>]
 [<MessagePackObject>]
 type ScenarioStats = {
-    [<Key 0>] ScenarioName: string
-    [<Key 1>] RequestCount: int
-    [<Key 2>] OkCount: int
-    [<Key 3>] FailCount: int
-    [<Key 4>] AllBytes: int64
-    [<Key 5>] StepStats: StepStats[]
-    [<Key 6>] LatencyCount: LatencyCount
-    [<Key 7>] LoadSimulationStats: LoadSimulationStats
-    [<Key 8>] StatusCodes: StatusCodeStats[]
-    [<Key 9>] CurrentOperation: OperationType
-    [<Key 10>] Duration: TimeSpan
+    [<Key 0>] ScenarioName: string        
+    [<Key 1>] Ok: MeasurementStats
+    [<Key 2>] Fail: MeasurementStats
+    [<Key 3>] StepStats: StepStats[]
+    [<Key 4>] LoadSimulationStats: LoadSimulationStats    
+    [<Key 5>] CurrentOperation: OperationType
+    [<Key 6>] Duration: TimeSpan
 } with
 
     member this.GetStepStats(stepName: string) = ScenarioStats.getStepStats stepName this
@@ -172,24 +165,19 @@ type ReportFile = {
 
 [<CLIMutable>]
 [<MessagePackObject>]
-type NodeStats = {
-    [<Key 0>] RequestCount: int
-    [<Key 1>] OkCount: int
-    [<Key 2>] FailCount: int
-    [<Key 3>] AllBytes: int64
-    [<Key 4>] ScenarioStats: ScenarioStats[]
+type NodeStats = {    
+    [<Key 0>] ScenarioStats: ScenarioStats[]
     [<IgnoreMember>] [<JsonField(Transform=typeof<DateTableTransform>)>] PluginStats: DataSet[]
-    [<Key 6>] NodeInfo: NodeInfo
-    [<Key 7>] TestInfo: TestInfo
+    [<Key 1>] NodeInfo: NodeInfo
+    [<Key 2>] TestInfo: TestInfo
     [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 9>] Duration: TimeSpan
+    [<Key 3>] Duration: TimeSpan
 } with
 
     member this.GetScenarioStats(scenarioName: string) = NodeStats.getScenarioStats scenarioName this
 
     [<CompiledName("Empty")>]
-    static member empty = {
-        RequestCount = 0; OkCount = 0; FailCount = 0; AllBytes = 0
+    static member empty = {        
         ScenarioStats = Array.empty; PluginStats = Array.empty
         NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty
         ReportFiles = Array.empty; Duration = TimeSpan.Zero
