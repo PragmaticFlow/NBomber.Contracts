@@ -39,7 +39,7 @@ type Response =
     static member ok([<Optional;DefaultParameterValue("")>] statusCode: string,
                      [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
                      [<Optional;DefaultParameterValue(0.0)>] latencyMs: float,
-                     [<Optional;DefaultParameterValue("")>] message: string): Response<obj> =
+                     [<Optional;DefaultParameterValue("")>] message: string) : Response<obj> =
         
         { StatusCode = statusCode
           IsError = false
@@ -53,7 +53,7 @@ type Response =
                          [<Optional;DefaultParameterValue("")>] statusCode: string,
                          [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
                          [<Optional;DefaultParameterValue(0.0)>] latencyMs: float,
-                         [<Optional;DefaultParameterValue("")>] message: string): Response<'T> =
+                         [<Optional;DefaultParameterValue("")>] message: string) : Response<'T> =
 
         { StatusCode = statusCode
           IsError = false
@@ -66,7 +66,7 @@ type Response =
     static member fail([<Optional;DefaultParameterValue("")>] error: string,
                        [<Optional;DefaultParameterValue("")>] statusCode: string,
                        [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float): Response<obj> =
+                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) : Response<obj> =
 
         { StatusCode = statusCode
           IsError = true
@@ -79,7 +79,7 @@ type Response =
     static member fail(error: Exception,
                        [<Optional;DefaultParameterValue("")>] statusCode: string,
                        [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float): Response<obj> =        
+                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) : Response<obj> =        
     
         { StatusCode = statusCode
           IsError = true
@@ -87,6 +87,32 @@ type Response =
           Message = if isNull error then String.Empty else error.Message
           LatencyMs = latencyMs
           Payload = None }
+
+    [<CompiledName("Fail")>]        
+    static member fail<'T>(error: Exception,
+                           [<Optional;DefaultParameterValue("")>] statusCode: string,
+                           [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
+                           [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) : Response<'T> =
+        
+        { StatusCode = statusCode
+          IsError = true
+          SizeBytes = sizeBytes
+          Message = if isNull error then String.Empty else error.Message
+          LatencyMs = latencyMs
+          Payload = None }
+        
+    [<CompiledName("Fail")>]        
+    static member fail<'T>([<Optional;DefaultParameterValue("")>] error: string,
+                           [<Optional;DefaultParameterValue("")>] statusCode: string,
+                           [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
+                           [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) : Response<'T> =
+        
+        { StatusCode = statusCode
+          IsError = true
+          SizeBytes = sizeBytes
+          Message = if isNull error then String.Empty else error
+          LatencyMs = latencyMs
+          Payload = None }       
 
 type ScenarioOperation =
     | WarmUp = 0
@@ -196,14 +222,5 @@ module internal ResponseInternal =
           IsError = true
           SizeBytes = 0
           Message = String.Empty
-          LatencyMs = 0
-          Payload = None }
-        
-    
-    let fail (error: Exception) : Response<'T> =
-        { StatusCode = ""
-          IsError = true
-          SizeBytes = 0
-          Message = if isNull error then String.Empty else error.Message
           LatencyMs = 0
           Payload = None }
