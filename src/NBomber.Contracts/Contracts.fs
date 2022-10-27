@@ -143,8 +143,7 @@ type IBaseContext =
 
 type IScenarioContext =    
     abstract ScenarioInfo: ScenarioInfo
-    abstract Logger: ILogger
-    abstract CancellationToken: CancellationToken
+    abstract Logger: ILogger    
     abstract InvocationNumber: int    
     abstract StopScenario: scenarioName:string * reason:string -> unit
     abstract StopCurrentTest: reason:string -> unit
