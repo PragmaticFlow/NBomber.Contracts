@@ -134,10 +134,7 @@ type IBaseContext =
     /// Gets current test info
     abstract TestInfo: TestInfo
     /// Gets current node info
-    abstract GetNodeInfo: unit -> NodeInfo
-    /// Cancellation token is a standard mechanics for canceling long-running operations.
-    /// Cancellation token should be used to help NBomber stop scenarios when the test is finished.
-    abstract CancellationToken: CancellationToken
+    abstract GetNodeInfo: unit -> NodeInfo    
     /// NBomber's logger
     abstract Logger: ILogger
 
