@@ -154,10 +154,7 @@ type IScenarioInitContext =
     /// Gets current node info
     abstract NodeInfo: NodeInfo
     /// Gets client settings content from configuration file
-    abstract CustomSettings: IConfiguration
-    /// Cancellation token is a standard mechanics for canceling long-running operations.
-    /// Cancellation token should be used to help NBomber stop scenarios when the test is finished.
-    abstract CancellationToken: CancellationToken
+    abstract CustomSettings: IConfiguration    
     /// NBomber's logger
     abstract Logger: ILogger
 
