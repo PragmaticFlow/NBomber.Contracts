@@ -184,6 +184,7 @@ type ScenarioProps = {
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
     ResetIterationOnFail: bool
+    MaxFailCount: int
 }
 
 type IReportingSink =
