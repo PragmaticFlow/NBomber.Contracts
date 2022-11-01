@@ -2,13 +2,9 @@ namespace NBomber.Contracts
 
 open System
 open System.Data
-open System.Runtime.InteropServices
-open System.Threading
 open System.Threading.Tasks
-
 open Serilog
 open Microsoft.Extensions.Configuration
-
 open NBomber.Contracts.Stats
 
 type IResponse =
@@ -32,87 +28,6 @@ type Response<'T> = {
         member x.LatencyMs = x.LatencyMs
         member x.Message = x.Message
         member x.SizeBytes = x.SizeBytes
-        
-type Response =        
-        
-    [<CompiledName("Ok")>]
-    static member ok([<Optional;DefaultParameterValue("")>] statusCode: string,
-                     [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                     [<Optional;DefaultParameterValue(0.0)>] latencyMs: float,
-                     [<Optional;DefaultParameterValue("")>] message: string) : Response<obj> =
-        
-        { StatusCode = statusCode
-          IsError = false
-          SizeBytes = sizeBytes
-          Message = if isNull message then String.Empty else message
-          LatencyMs = latencyMs
-          Payload = None }
-    
-    [<CompiledName("Ok")>]
-    static member ok<'T>(payload: 'T,
-                         [<Optional;DefaultParameterValue("")>] statusCode: string,
-                         [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                         [<Optional;DefaultParameterValue(0.0)>] latencyMs: float,
-                         [<Optional;DefaultParameterValue("")>] message: string) : Response<'T> =
-
-        { StatusCode = statusCode
-          IsError = false
-          SizeBytes = sizeBytes
-          Message = if isNull message then String.Empty else message
-          LatencyMs = latencyMs
-          Payload = Some payload }
-        
-    [<CompiledName("Fail")>]
-    static member fail(error: Exception,
-                       [<Optional;DefaultParameterValue("")>] statusCode: string,
-                       [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) : Response<obj> =        
-    
-        { StatusCode = statusCode
-          IsError = true
-          SizeBytes = sizeBytes
-          Message = if isNull error then String.Empty else error.Message
-          LatencyMs = latencyMs
-          Payload = None }        
-        
-    [<CompiledName("Fail")>]
-    static member fail([<Optional;DefaultParameterValue("")>] message: string,
-                       [<Optional;DefaultParameterValue("")>] statusCode: string,
-                       [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                       [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) : Response<obj> =
-
-        { StatusCode = statusCode
-          IsError = true
-          SizeBytes = sizeBytes
-          Message = if isNull message then String.Empty else message
-          LatencyMs = latencyMs
-          Payload = None }
-
-    [<CompiledName("Fail")>]        
-    static member fail<'T>(error: Exception,
-                           [<Optional;DefaultParameterValue("")>] statusCode: string,
-                           [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                           [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) : Response<'T> =
-        
-        { StatusCode = statusCode
-          IsError = true
-          SizeBytes = sizeBytes
-          Message = if isNull error then String.Empty else error.Message
-          LatencyMs = latencyMs
-          Payload = None }
-        
-    [<CompiledName("Fail")>]        
-    static member fail<'T>([<Optional;DefaultParameterValue("")>] message: string,
-                           [<Optional;DefaultParameterValue("")>] statusCode: string,
-                           [<Optional;DefaultParameterValue(0)>] sizeBytes: int,
-                           [<Optional;DefaultParameterValue(0.0)>] latencyMs: float) : Response<'T> =
-        
-        { StatusCode = statusCode
-          IsError = true
-          SizeBytes = sizeBytes
-          Message = if isNull message then String.Empty else message
-          LatencyMs = latencyMs
-          Payload = None }       
 
 type ScenarioOperation =
     | WarmUp = 0
@@ -208,13 +123,3 @@ type IWorkerPlugin =
 type ApplicationType =
     | Process = 0
     | Console = 1
-        
-module internal ResponseInternal =
-    
-    let emptyFail<'T> : Response<'T> =
-        { StatusCode = ""
-          IsError = true
-          SizeBytes = 0
-          Message = String.Empty
-          LatencyMs = 0
-          Payload = None }
