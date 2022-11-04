@@ -3,6 +3,7 @@ namespace NBomber.Contracts
 open System
 open System.Data
 open System.Threading.Tasks
+open MessagePack
 open Serilog
 open Microsoft.Extensions.Configuration
 open NBomber.Contracts.Stats
@@ -14,13 +15,15 @@ type IResponse =
     abstract LatencyMs: float
     abstract Message: string     
 
+[<CLIMutable>]
+[<MessagePackObject>]
 type Response<'T> = {
-    StatusCode: string
-    IsError: bool
-    SizeBytes: int
-    LatencyMs: float
-    Message: string
-    Payload: 'T option
+    [<Key 0>] StatusCode: string
+    [<Key 1>] IsError: bool
+    [<Key 2>] SizeBytes: int
+    [<Key 3>] LatencyMs: float
+    [<IgnoreMember>] Message: string
+    [<IgnoreMember>] Payload: 'T option
 } with
     interface IResponse with
         member x.StatusCode = x.StatusCode
