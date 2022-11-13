@@ -1,6 +1,7 @@
 namespace NBomber.Contracts
 
 open System
+open System.Collections.Generic
 open System.Data
 open System.Threading.Tasks
 open MessagePack
@@ -58,8 +59,9 @@ type IBaseContext =
 
 type IScenarioContext =    
     abstract ScenarioInfo: ScenarioInfo
-    abstract Logger: ILogger    
-    abstract InvocationNumber: int    
+    abstract Logger: ILogger
+    abstract InvocationNumber: int
+    abstract Data: Dictionary<string,obj>
     abstract StopScenario: scenarioName:string * reason:string -> unit
     abstract StopCurrentTest: reason:string -> unit
 
