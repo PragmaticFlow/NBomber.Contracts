@@ -135,13 +135,17 @@ type LoadSimulationStats = {
 [<CLIMutable>]
 [<MessagePackObject>]
 type ScenarioStats = {
-    [<Key 0>] ScenarioName: string        
+    [<Key 0>] ScenarioName: string     
     [<Key 1>] Ok: MeasurementStats
     [<Key 2>] Fail: MeasurementStats
-    [<Key 3>] StepStats: StepStats[]
-    [<Key 4>] LoadSimulationStats: LoadSimulationStats    
+    [<Key 3>] StepStats: StepStats[]    
+    [<Key 4>] LoadSimulationStats: LoadSimulationStats
     [<Key 5>] CurrentOperation: OperationType
-    [<Key 6>] Duration: TimeSpan
+    [<Key 6>] AllRequestCount: int
+    [<Key 7>] AllOkCount: int
+    [<Key 8>] AllFailCount: int
+    [<Key 9>] AllBytes: int64    
+    [<Key 10>] Duration: TimeSpan
 } with
 
     member this.GetStepStats(stepName: string) = ScenarioStats.getStepStats stepName this
@@ -164,7 +168,11 @@ type NodeStats = {
     [<Key 1>] NodeInfo: NodeInfo
     [<Key 2>] TestInfo: TestInfo
     [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 3>] Duration: TimeSpan
+    [<Key 3>] AllRequestCount: int
+    [<Key 4>] AllOkCount: int
+    [<Key 5>] AllFailCount: int
+    [<Key 6>] AllBytes: int64
+    [<Key 7>] Duration: TimeSpan
 } with
 
     member this.GetScenarioStats(scenarioName: string) = NodeStats.getScenarioStats scenarioName this
@@ -172,8 +180,9 @@ type NodeStats = {
     [<CompiledName("Empty")>]
     static member empty = {        
         ScenarioStats = Array.empty; PluginStats = Array.empty
-        NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty
-        ReportFiles = Array.empty; Duration = TimeSpan.Zero
+        NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty; ReportFiles = Array.empty
+        AllRequestCount = 0; AllOkCount = 0; AllFailCount = 0; AllBytes = 0                
+        Duration = TimeSpan.Zero
     }
 
     [<CompiledName("GetScenarioStats")>]

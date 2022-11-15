@@ -12,7 +12,7 @@ open NBomber.Contracts.Stats
 type IResponse =
     abstract StatusCode: string
     abstract IsError: bool
-    abstract SizeBytes: int
+    abstract SizeBytes: int with get,set
     abstract LatencyMs: float
     abstract Message: string     
 
@@ -21,18 +21,18 @@ type IResponse =
 type Response<'T> = {
     [<Key 0>] StatusCode: string
     [<Key 1>] IsError: bool
-    [<Key 2>] SizeBytes: int
+    [<Key 2>] mutable SizeBytes: int
     [<Key 3>] LatencyMs: float
     [<IgnoreMember>] Message: string
     [<IgnoreMember>] Payload: 'T option
 } with
     interface IResponse with
-        member x.StatusCode = x.StatusCode
-        member x.IsError = x.IsError
-        member x.LatencyMs = x.LatencyMs
-        member x.Message = x.Message
-        member x.SizeBytes = x.SizeBytes
-
+        member this.StatusCode = this.StatusCode
+        member this.IsError = this.IsError
+        member this.SizeBytes with get() = this.SizeBytes and set value = this.SizeBytes <- value
+        member this.LatencyMs = this.LatencyMs
+        member this.Message = this.Message        
+        
 type ScenarioOperation =
     | WarmUp = 0
     | Bombing = 1
