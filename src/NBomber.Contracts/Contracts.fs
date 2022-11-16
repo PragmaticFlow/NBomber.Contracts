@@ -4,7 +4,6 @@ open System
 open System.Collections.Generic
 open System.Data
 open System.Threading.Tasks
-open MessagePack
 open Serilog
 open Microsoft.Extensions.Configuration
 open NBomber.Contracts.Stats
@@ -16,22 +15,20 @@ type IResponse =
     abstract LatencyMs: float
     abstract Message: string     
 
-[<CLIMutable>]
-[<MessagePackObject>]
 type Response<'T> = {
-    [<Key 0>] StatusCode: string
-    [<Key 1>] IsError: bool
-    [<Key 2>] mutable SizeBytes: int
-    [<Key 3>] LatencyMs: float
-    [<IgnoreMember>] Message: string
-    [<IgnoreMember>] Payload: 'T option
+    StatusCode: string
+    IsError: bool
+    mutable SizeBytes: int
+    LatencyMs: float
+    Message: string
+    Payload: 'T option
 } with
-    interface IResponse with
+    interface IResponse with        
         member this.StatusCode = this.StatusCode
         member this.IsError = this.IsError
         member this.SizeBytes with get() = this.SizeBytes and set value = this.SizeBytes <- value
         member this.LatencyMs = this.LatencyMs
-        member this.Message = this.Message        
+        member this.Message = this.Message
         
 type ScenarioOperation =
     | WarmUp = 0
@@ -100,7 +97,7 @@ type ScenarioProps = {
     ScenarioName: string
     Init: (IScenarioInitContext -> Task) option
     Clean: (IScenarioInitContext -> Task) option
-    Run: (IScenarioContext -> Task<Response<obj>>) option
+    Run: (IScenarioContext -> Task<IResponse>) option
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
     ResetIterationOnFail: bool
