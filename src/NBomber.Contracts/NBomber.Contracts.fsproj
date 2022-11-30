@@ -13,8 +13,9 @@
         <RepositoryUrl>https://github.com/PragmaticFlow/NBomber.Contracts</RepositoryUrl>
         <PackageTags>load-testing, performance-testing, integration-testing, fsharp</PackageTags>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <Description>Public contracts for NBomber</Description>
-        <Title>NBomber.Contracts</Title>
+        <Title>NBomber.Contracts</Title>        
     </PropertyGroup>
 
     <ItemGroup>
