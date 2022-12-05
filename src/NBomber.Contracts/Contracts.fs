@@ -72,6 +72,7 @@ type IScenarioInitContext =
     /// NBomber's logger
     abstract Logger: ILogger
 
+/// LoadSimulation helps to define the load profile for the target system. 
 type LoadSimulation =
     /// Injects a given number of scenario copies (threads) with a linear ramp over a given duration.
     /// Every single scenario copy will iterate while the specified duration.
@@ -96,6 +97,9 @@ type LoadSimulation =
     /// Every single scenario copy will run only once.
     /// Use it when you want to maintain a random rate of requests without being affected by the performance of the system under test.
     | InjectRandom of minRate:int * maxRate:int * interval:TimeSpan * during:TimeSpan
+    
+    /// Pause for a given duration
+    | Pause of during:TimeSpan
 
 type ScenarioProps = {
     ScenarioName: string
