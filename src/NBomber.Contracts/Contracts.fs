@@ -11,14 +11,14 @@ open NBomber.Contracts.Stats
 type IResponse =
     abstract StatusCode: string
     abstract IsError: bool
-    abstract SizeBytes: int with get,set
+    abstract SizeBytes: int
     abstract LatencyMs: float
     abstract Message: string     
 
 type Response<'T> = {
     StatusCode: string
     IsError: bool
-    mutable SizeBytes: int
+    SizeBytes: int
     LatencyMs: float
     Message: string
     Payload: 'T option
@@ -26,7 +26,7 @@ type Response<'T> = {
     interface IResponse with        
         member this.StatusCode = this.StatusCode
         member this.IsError = this.IsError
-        member this.SizeBytes with get() = this.SizeBytes and set value = this.SizeBytes <- value
+        member this.SizeBytes = this.SizeBytes
         member this.LatencyMs = this.LatencyMs
         member this.Message = this.Message
         
