@@ -57,7 +57,7 @@ type IBaseContext =
 type IScenarioContext =
     abstract TestInfo: TestInfo
     abstract ScenarioInfo: ScenarioInfo
-    abstract GetNodeInfo: unit -> NodeInfo
+    abstract NodeInfo: NodeInfo
     abstract Logger: ILogger
     abstract InvocationNumber: int
     abstract Data: Dictionary<string,obj>
