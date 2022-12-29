@@ -110,7 +110,7 @@ type ScenarioProps = {
     Run: (IScenarioContext -> Task<IResponse>) option
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
-    ResetIterationOnFail: bool
+    RestartIterationOnFail: bool
     MaxFailCount: int
 }
 
