@@ -47,13 +47,16 @@ type ScenarioInfo = {
 }
 
 type IBaseContext =
-    /// Gets current test info
+    /// Gets current test info. 
     abstract TestInfo: TestInfo
-    /// Gets current node info
+    /// Gets current node info.
     abstract GetNodeInfo: unit -> NodeInfo    
-    /// NBomber's logger
+    /// NBomber's logger.
     abstract Logger: ILogger
 
+/// ScenarioContext represents the execution context of the currently running Scenario.
+/// It provides functionality to log particular events, get information about the test, thread id, scenario copy/instance number, etc.
+/// Also, it provides the option to stop all or particular scenarios manually.
 type IScenarioContext =
     abstract TestInfo: TestInfo
     abstract ScenarioInfo: ScenarioInfo
@@ -74,33 +77,70 @@ type IScenarioInitContext =
     /// NBomber's logger
     abstract Logger: ILogger
 
-/// LoadSimulation helps to define the load profile for the target system. 
+/// LoadSimulation allows configuring parallelism and workload profiles. 
 type LoadSimulation =
-    /// Injects a given number of scenario copies (threads) with a linear ramp over a given duration.
-    /// Every single scenario copy will iterate while the specified duration.
-    /// Use it for ramp up and rump down.
+    /// <summary>
+    /// Adds or removes a given number of Scenario copies(instances) with a linear ramp over a given duration.    
+    /// Each Scenario copy behaves like a long-running thread that runs continually(by specified duration) and will be destroyed when the current load simulation stops.
+    /// Use it for a smooth ramp up and ramp down.
+    /// Usually, this simulation type is used to test databases, message brokers, or any other system that works with a static client's pool of connections and reuses them.        
+    /// </summary>
+    /// <param name="copies">The number of concurrent Scenario copies that will be running in parallel.</param>
+    /// <param name="during">The duration of load simulation.</param>
     | RampingConstant of copies:int * during:TimeSpan
     
-    /// A fixed number of scenario copies (threads) executes as many iterations as possible for a specified amount of time.
-    /// Every single scenario copy will iterate while the specified duration.
-    /// Use it when you need to run a specific amount of scenario copies (threads) for a certain amount of time.
+    /// <summary>
+    /// Keeps activated(constantly running) a fixed number of Scenario copies(instances) which executes as many iterations as possible for a specified duration.
+    /// Each Scenario copy behaves like a long-running thread that runs continually(by specified duration) and will be destroyed when the current load simulation stops.
+    /// Use it when you need to run and keep a constant amount of Scenario copies for a specific period.
+    /// Usually, this simulation type is used to test databases, message brokers, or any other system that works with a static client's pool of connections and reuses them.    
+    /// </summary>
+    /// <param name="copies">The number of concurrent Scenario copies that will be running in parallel.</param>
+    /// <param name="during">The duration of load simulation.</param>
     | KeepConstant of copies:int * during:TimeSpan
     
-    /// Injects a given number of scenario copies (threads) from the current rate to the target rate during a given duration.
-    /// Every single scenario copy will run only once.
+    /// <summary>
+    /// Injects a given number of Scenario copies(instances) with a linear ramp over a given duration.
+    /// Each Scenario copy behaves like a short-running thread that runs only once and then is destroyed.
+    /// With this simulation, you control the Scenario injection rate and injection interval.
+    /// Use it for a smooth ramp up and ramp down.
+    /// Usually, this simulation type is used to test HTTP API.
+    /// </summary>
+    /// <param name="rate">The injection rate of Scenario copies. It configures how many concurrent copies will be injected at a time.</param>
+    /// <param name="interval">The injection interval. It configures the interval between injections. </param>
+    /// <param name="during">The duration of load simulation.</param>
     | RampingInject of rate:int * interval:TimeSpan * during:TimeSpan
     
-    /// Injects a given number of scenario copies (threads) during a given duration.
-    /// Every single scenario copy will run only once.
-    /// Use it when you want to maintain a constant rate of requests without being affected by the performance of the system under test.    
+    /// <summary>
+    /// Injects a given number of Scenario copies(instances) during a given duration.
+    /// Each Scenario copy behaves like a short-running thread that runs only once and then is destroyed.
+    /// With this simulation, you control the Scenario injection rate and injection interval.
+    /// Use it when you want to maintain a constant rate of requests without being affected by the performance of the system you load test.
+    /// Usually, this simulation type is used to test HTTP API.
+    /// </summary>
+    /// <param name="rate">The injection rate of Scenario copies. It configures how many concurrent copies will be injected at a time.</param>
+    /// <param name="interval">The injection interval. It configures the interval between injections. </param>
+    /// <param name="during">The duration of load simulation.</param>   
     | Inject of rate:int * interval:TimeSpan * during:TimeSpan
     
-    /// Injects a random number of scenario copies (threads) during a given duration.
-    /// Every single scenario copy will run only once.
-    /// Use it when you want to maintain a random rate of requests without being affected by the performance of the system under test.
+    /// <summary>
+    /// Injects a given random number of Scenario copies(instances) during a given duration.
+    /// Each Scenario copy behaves like a short-running thread that runs only once and then is destroyed.
+    /// With this simulation, you control the Scenario injection rate and injection interval.
+    /// Use it when you want to maintain a random rate of requests without being affected by the performance of the system you load test.
+    /// Usually, this simulation type is used to test HTTP API.
+    /// </summary>
+    /// <param name="minRate">The min injection rate of Scenario copies.</param>
+    /// <param name="maxRate">The max injection rate of Scenario copies.</param>
+    /// <param name="interval">The injection interval. It configures the interval between injections.</param>
+    /// <param name="during">The duration of load simulation.</param>
     | InjectRandom of minRate:int * maxRate:int * interval:TimeSpan * during:TimeSpan
     
-    /// Pause for a given duration
+    /// <summary>
+    /// Introduces Scenario pause simulation for a given duration.
+    /// It's useful for cases when some Scenario start should be delayed or paused in the middle of execution.
+    /// </summary>
+    /// <param name="during">The duration of load simulation.</param>
     | Pause of during:TimeSpan
 
 type ScenarioProps = {
@@ -114,22 +154,99 @@ type ScenarioProps = {
     MaxFailCount: int
 }
 
+/// ReportingSink provides functionality for saving real-time and final statistics.
 type IReportingSink =
     inherit IDisposable
     abstract SinkName: string
+    
+    /// <summary>
+    /// Inits ReportingSink.
+    /// Usually, in this method, ReportingSink reads JSON configuration and establishes a connection to reporting data storage.
+    /// </summary>
+    /// <param name="context">Base NBomber execution context. It can be used to get a logger, test info, etc.</param>
+    /// <param name="infraConfig">Represent JSON config for infrastructure.</param>
     abstract Init: context:IBaseContext * infraConfig:IConfiguration -> Task
+    
+    /// <summary>
+    /// Starts execution and saves a metric representing the load test's START.
+    /// This method will be invoked two times: for a warm-up(if it's enabled) and the bombing.    
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// // to get info about the current operation:    
+    /// IBaseContext.GetNodeInfo().CurrentOperation == OperationType.WarmUp    
+    /// </code>
+    /// </example>
     abstract Start: unit -> Task
+    
+    /// <summary>
+    /// Saves real-time stats data.
+    /// This method will be invoked periodically, by specified ReportingInterval.
+    /// </summary>
+    /// <param name="stats">Real-time stats data of the running scenarios.</param>
     abstract SaveRealtimeStats: stats:ScenarioStats[] -> Task
+    
+    /// <summary>
+    /// Saves final stats data.
+    /// This method will be invoked when the load test is finished.
+    /// </summary>
+    /// <param name="stats">Final stats data of the finished scenarios.</param>
     abstract SaveFinalStats: stats:NodeStats -> Task
+    
+    /// <summary>
+    /// Stops execution and saves a metric representing the load test's STOP.    
+    /// This method will be invoked two times: for a warm-up(if it's enabled) and the bombing.
+    /// By default, this method shouldn't execute any logic related to cleaning ReportingSink's resources, opened connections, etc.
+    /// To clean resources, ReportingSink implements the IDisposal interface. 
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// // to get info about the current operation:    
+    /// IBaseContext.GetNodeInfo().CurrentOperation == OperationType.WarmUp    
+    /// </code>
+    /// </example>
     abstract Stop: unit -> Task
 
+/// WorkerPlugin provides functionality for building background workers.
+/// The basic concept of a background worker - it's a worker that starts in parallel with a test and does some work, and then can return statistics that will be included into report.
+/// A good example of a background worker is PingPlugin which checks the physical latency between NBomber's agent and target system and then prints results in a report. 
 type IWorkerPlugin =
     inherit IDisposable
     abstract PluginName: string
+    
+    /// <summary>
+    /// Inits WorkerPlugin.
+    /// Usually, in this method, WorkerPlugin reads JSON configuration and prepare all necessary dependencies.
+    /// </summary>
+    /// <param name="context">Base NBomber execution context. It can be used to get a logger, test info, etc.</param>
+    /// <param name="infraConfig">Represent JSON config for infrastructure.</param>
     abstract Init: context:IBaseContext * infraConfig:IConfiguration -> Task
+    
+    /// <summary>
+    /// Starts execution.
+    /// This method will be invoked two times: for a warm-up(if it's enabled) and the bombing.
+    /// </summary>    
+    /// <example>
+    /// <code>
+    /// // to get info about the current operation:    
+    /// IBaseContext.GetNodeInfo().CurrentOperation == OperationType.WarmUp    
+    /// </code>
+    /// </example>
     abstract Start: unit -> Task
+    
     abstract GetStats: stats:NodeStats -> Task<DataSet>
     abstract GetHints: unit -> string[]
+    
+    /// <summary>
+    /// Stops execution.
+    /// This method will be invoked two times: for a warm-up(if it's enabled) and the bombing.
+    /// </summary>    
+    /// <example>
+    /// <code>
+    /// // to get info about the current operation:    
+    /// IBaseContext.GetNodeInfo().CurrentOperation == OperationType.WarmUp    
+    /// </code>
+    /// </example>
     abstract Stop: unit -> Task
 
 type ApplicationType =
