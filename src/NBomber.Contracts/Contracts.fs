@@ -67,13 +67,32 @@ type IScenarioContext =
     abstract StopScenario: scenarioName:string * reason:string -> unit
     abstract StopCurrentTest: reason:string -> unit
 
+/// Represents scenario partition.
+/// In the cluster mode, the Coordinator automatically assigns ScenarioPartition to each Agent that runs the same Scenario.
+type ScenarioPartition = {    
+    /// Gets scenario partition number in the cluster.    
+    Number: int
+    
+    /// Gets scenario partitions count in the cluster.
+    Count: int
+} with
+    [<CompiledName("Empty")>]
+    static member empty = { Number = 1; Count = 1 }
+
 type IScenarioInitContext =
     /// Gets current test info
     abstract TestInfo: TestInfo
+    
     /// Gets current node info
     abstract NodeInfo: NodeInfo
+    
     /// Gets client settings content from configuration file
-    abstract CustomSettings: IConfiguration    
+    abstract CustomSettings: IConfiguration
+    
+    /// Gets scenario partition in the cluster.
+    /// In the cluster mode, the Coordinator automatically assigns ScenarioPartition to each Agent that runs the same Scenario. 
+    abstract ScenarioPartition: ScenarioPartition    
+    
     /// NBomber's logger
     abstract Logger: ILogger
 
