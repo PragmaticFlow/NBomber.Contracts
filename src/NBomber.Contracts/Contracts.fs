@@ -31,8 +31,10 @@ type Response<'T> = {
         member this.Message = this.Message
         
 type ScenarioOperation =
-    | WarmUp = 0
-    | Bombing = 1
+    | Init = 0
+    | Clean = 1
+    | WarmUp = 2
+    | Bombing = 3
 
 type ScenarioInfo = {
     /// Gets the current scenario thread id.
@@ -82,6 +84,9 @@ type ScenarioPartition = {
 type IScenarioInitContext =
     /// Gets current test info
     abstract TestInfo: TestInfo
+    
+    /// Gets current Scenario info
+    abstract ScenarioInfo: ScenarioInfo
     
     /// Gets current node info
     abstract NodeInfo: NodeInfo
