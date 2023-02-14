@@ -35,8 +35,9 @@ type OperationType =
     | Init = 1
     | WarmUp = 2
     | Bombing = 3
-    | Stop = 4
+    | Stop = 4     
     | Complete = 5
+    | Error = 6
 
 [<CLIMutable>]
 [<MessagePackObject>]
