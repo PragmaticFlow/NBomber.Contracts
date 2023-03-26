@@ -98,9 +98,9 @@ type LatencyStats = {
 [<CLIMutable>]
 [<MessagePackObject>]
 type DataTransferStats = {
-    [<Key 0>] MinBytes: int
-    [<Key 1>] MeanBytes: int
-    [<Key 2>] MaxBytes: int
+    [<Key 0>] MinBytes: int64
+    [<Key 1>] MeanBytes: int64
+    [<Key 2>] MaxBytes: int64
     [<Key 3>] Percent50: int
     [<Key 4>] Percent75: int
     [<Key 5>] Percent95: int
