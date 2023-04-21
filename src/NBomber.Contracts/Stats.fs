@@ -165,22 +165,23 @@ type ReportFile = {
 [<MessagePackObject>]
 type NodeStats = {    
     [<Key 0>] ScenarioStats: ScenarioStats[]
+    [<Key 1>] MetricStats: MetricStats[]
     [<IgnoreMember>] [<JsonField(Transform=typeof<DateTableTransform>)>] PluginStats: DataSet[]
-    [<Key 1>] NodeInfo: NodeInfo
-    [<Key 2>] TestInfo: TestInfo
+    [<Key 2>] NodeInfo: NodeInfo
+    [<Key 3>] TestInfo: TestInfo
     [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 3>] AllRequestCount: int
-    [<Key 4>] AllOkCount: int
-    [<Key 5>] AllFailCount: int
-    [<Key 6>] AllBytes: int64
-    [<Key 7>] Duration: TimeSpan
+    [<Key 4>] AllRequestCount: int
+    [<Key 5>] AllOkCount: int
+    [<Key 6>] AllFailCount: int
+    [<Key 7>] AllBytes: int64
+    [<Key 8>] Duration: TimeSpan
 } with
 
     member this.GetScenarioStats(scenarioName: string) = NodeStats.getScenarioStats scenarioName this
 
     [<CompiledName("Empty")>]
     static member empty = {        
-        ScenarioStats = Array.empty; PluginStats = Array.empty
+        ScenarioStats = Array.empty; PluginStats = Array.empty; MetricStats = Array.empty
         NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty; ReportFiles = Array.empty
         AllRequestCount = 0; AllOkCount = 0; AllFailCount = 0; AllBytes = 0                
         Duration = TimeSpan.Zero
