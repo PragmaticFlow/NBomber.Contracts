@@ -21,9 +21,10 @@ type TestInfo = {
     [<Key 1>] TestSuite: string
     [<Key 2>] TestName: string
     [<Key 3>] ClusterId: string
+    [<Key 4>] Created: DateTime
 } with
     [<CompiledName("Empty")>]
-    static member empty = { SessionId = ""; TestSuite = ""; TestName = ""; ClusterId = "" }
+    static member empty = { SessionId = ""; TestSuite = ""; TestName = ""; ClusterId = ""; Created = DateTime.MinValue }
 
 type NodeType =
     | SingleNode
