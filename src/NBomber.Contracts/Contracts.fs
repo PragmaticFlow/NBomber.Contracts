@@ -271,6 +271,7 @@ type IWorkerPlugin =
     /// Usually, in this method, WorkerPlugin reads JSON configuration and prepare all necessary dependencies.
     /// </summary>
     /// <param name="context">Base NBomber execution context. It can be used to get a logger, test info, etc.</param>
+    /// <param name="metricsProvider">Instance of metric provider. It should be used to record metrics.</param>
     /// <param name="infraConfig">Represent JSON config for infrastructure.</param>
     abstract Init: context:IBaseContext * metricsProvider:IMetricsProvider * infraConfig:IConfiguration -> Task
     
