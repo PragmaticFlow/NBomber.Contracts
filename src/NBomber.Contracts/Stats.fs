@@ -197,6 +197,11 @@ type TimeLineHistoryRecord = {
     Duration: TimeSpan
 }
 
+type MetricHistoryRecord = {
+    Metrics: MetricStats[]
+    Timestamp: TimeSpan
+}
+
 [<JsonField(EnumValue = EnumMode.Value)>]
 type HintSourceType =
     | Scenario = 0
@@ -211,6 +216,7 @@ type HintResult = {
 type NodeSessionResult = {
     FinalStats: NodeStats
     TimeLineHistory: TimeLineHistoryRecord[]
+    MetricsHistory: MetricHistoryRecord[]
     Hints: HintResult[]
 } with
 
@@ -218,5 +224,6 @@ type NodeSessionResult = {
     static member empty = {
         FinalStats = NodeStats.empty
         TimeLineHistory = Array.empty
+        MetricsHistory = Array.empty
         Hints = Array.empty
     }

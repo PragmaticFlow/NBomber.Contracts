@@ -48,6 +48,34 @@ type ScenarioInfo = {
     ScenarioOperation: ScenarioOperation
 }
 
+/// MetricsProvider provides functionality for publishing custom metrics that will be aggregated.
+/// It can be used for cases related to grabbing performance counters or other time series data.
+/// It supports standard metric types: Histogram, Gauge.
+type IMetricsProvider =
+    
+    /// <summary>
+    /// Registers metric.
+    /// The metric should be registered first before any usage. 
+    /// </summary>
+    /// <param name="metricName">Unique metric name.</param>
+    /// <param name="measureUnit">Measure unit.</param>
+    /// <param name="scalingFraction">Scaling fraction. Under the hood, the metric values are stored as int64.
+    /// In order to be able to express a metric value as double, the multiplication by scaling factor is used.</param>
+    /// <param name="metricType">Metric type.</param>
+    /// <example>
+    /// <code>
+    ///  metricsProvider.RegisterMetric("thread-count", "MB", 1, MetricType.Gauge)    
+    /// </code>
+    /// </example>
+    abstract RegisterMetric: metricName:string * measureUnit:string * scalingFraction:float * metricType:MetricType -> unit
+    
+    /// <summary>
+    /// Publishes metric.
+    /// </summary>
+    /// <param name="metricName">Unique metric name. The metric name should be registered before publishing.</param>
+    /// <param name="value">Metric value.</param>
+    abstract PublishMetric: metricName:string * value:float -> unit
+
 type IBaseContext =
     /// Gets current test info. 
     abstract TestInfo: TestInfo
@@ -55,6 +83,8 @@ type IBaseContext =
     abstract GetNodeInfo: unit -> NodeInfo    
     /// NBomber's logger.
     abstract Logger: ILogger
+    /// Instance of metric provider. It should be used to record metrics.
+    abstract MetricsProvider: IMetricsProvider
 
 /// ScenarioContext represents the execution context of the currently running Scenario.
 /// It provides functionality to log particular events, get information about the test, thread id, scenario copy/instance number, etc.
@@ -231,34 +261,6 @@ type IReportingSink =
     /// </example>
     abstract Stop: unit -> Task
 
-/// MetricsProvider provides functionality for publishing custom metrics that will be aggregated.
-/// It can be used for cases related to grabbing performance counters or other time series data.
-/// It supports standard metric types: Histogram, Gauge.
-type IMetricsProvider =
-    
-    /// <summary>
-    /// Registers metric.
-    /// The metric should be registered first before any usage. 
-    /// </summary>
-    /// <param name="metricName">Unique metric name.</param>
-    /// <param name="measureUnit">Measure unit.</param>
-    /// <param name="scalingFraction">Scaling fraction. Under the hood, the metric values are stored as int64.
-    /// In order to be able to express a metric value as double, the multiplication by scaling factor is used.</param>
-    /// <param name="metricType">Metric type.</param>
-    /// <example>
-    /// <code>
-    ///  metricsProvider.RegisterMetric("thread-count", "MB", 1, MetricType.Gauge)    
-    /// </code>
-    /// </example>
-    abstract RegisterMetric: metricName:string * measureUnit:string * scalingFraction:float * metricType:MetricType -> unit
-    
-    /// <summary>
-    /// Publishes metric.
-    /// </summary>
-    /// <param name="metricName">Unique metric name. The metric name should be registered before publishing.</param>
-    /// <param name="value">Metric value.</param>
-    abstract PublishMetric: metricName:string * value:float -> unit
-
 /// WorkerPlugin provides functionality for building background workers.
 /// The basic concept of a background worker - it's a worker that starts in parallel with a test and does some work, and then can return statistics that will be included into report.
 /// A good example of a background worker is PingPlugin which checks the physical latency between NBomber's agent and target system and then prints results in a report. 
@@ -270,10 +272,9 @@ type IWorkerPlugin =
     /// Inits WorkerPlugin.
     /// Usually, in this method, WorkerPlugin reads JSON configuration and prepare all necessary dependencies.
     /// </summary>
-    /// <param name="context">Base NBomber execution context. It can be used to get a logger, test info, etc.</param>
-    /// <param name="metricsProvider">Instance of metric provider. It should be used to record metrics.</param>
+    /// <param name="context">Base NBomber execution context. It can be used to get a logger, test info, etc.</param>    
     /// <param name="infraConfig">Represent JSON config for infrastructure.</param>
-    abstract Init: context:IBaseContext * metricsProvider:IMetricsProvider * infraConfig:IConfiguration -> Task
+    abstract Init: context:IBaseContext * infraConfig:IConfiguration -> Task
     
     /// <summary>
     /// Starts execution.

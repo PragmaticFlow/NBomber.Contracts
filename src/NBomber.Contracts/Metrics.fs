@@ -27,8 +27,7 @@ type MetricStats = {
     [<Key 0>] Name: string
     [<Key 1>] MeasureUnit: string
     [<Key 2>] MetricType: MetricType
-    [<Key 3>] Current: float
-    [<Key 4>] Max: float
-    [<Key 5>] Duration: TimeSpan
-    [<Key 6>] Percentiles: MetricPercentiles option
+    [<Key 3>] Current: float    
+    [<Key 4>] Timestamp: TimeSpan
+    [<Key 5>] Percentiles: MetricPercentiles option
 }
