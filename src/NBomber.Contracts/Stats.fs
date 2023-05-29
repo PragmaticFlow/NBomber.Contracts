@@ -165,24 +165,23 @@ type ReportFile = {
 [<CLIMutable>]
 [<MessagePackObject>]
 type NodeStats = {    
-    [<Key 0>] ScenarioStats: ScenarioStats[]
-    [<Key 1>] MetricStats: MetricStats[]
+    [<Key 0>] ScenarioStats: ScenarioStats[]    
     [<IgnoreMember>] [<JsonField(Transform=typeof<DateTableTransform>)>] PluginStats: DataSet[]
     [<Key 2>] NodeInfo: NodeInfo
     [<Key 3>] TestInfo: TestInfo
     [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 4>] AllRequestCount: int
-    [<Key 5>] AllOkCount: int
-    [<Key 6>] AllFailCount: int
-    [<Key 7>] AllBytes: int64
-    [<Key 8>] Duration: TimeSpan
+    [<Key 5>] AllRequestCount: int
+    [<Key 6>] AllOkCount: int
+    [<Key 7>] AllFailCount: int
+    [<Key 8>] AllBytes: int64
+    [<Key 9>] Duration: TimeSpan
 } with
 
     member this.GetScenarioStats(scenarioName: string) = NodeStats.getScenarioStats scenarioName this
 
     [<CompiledName("Empty")>]
     static member empty = {        
-        ScenarioStats = Array.empty; PluginStats = Array.empty; MetricStats = Array.empty
+        ScenarioStats = Array.empty; PluginStats = Array.empty
         NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty; ReportFiles = Array.empty
         AllRequestCount = 0; AllOkCount = 0; AllFailCount = 0; AllBytes = 0                
         Duration = TimeSpan.Zero
@@ -195,11 +194,6 @@ type NodeStats = {
 type TimeLineHistoryRecord = {
     ScenarioStats: ScenarioStats[]
     Duration: TimeSpan
-}
-
-type MetricHistoryRecord = {
-    Metrics: MetricStats[]
-    Timestamp: TimeSpan
 }
 
 [<JsonField(EnumValue = EnumMode.Value)>]
@@ -216,7 +210,7 @@ type HintResult = {
 type NodeSessionResult = {
     FinalStats: NodeStats
     TimeLineHistory: TimeLineHistoryRecord[]
-    MetricsHistory: MetricHistoryRecord[]
+    Metrics: MetricStats[]
     Hints: HintResult[]
 } with
 
@@ -224,6 +218,6 @@ type NodeSessionResult = {
     static member empty = {
         FinalStats = NodeStats.empty
         TimeLineHistory = Array.empty
-        MetricsHistory = Array.empty
+        Metrics = Array.empty
         Hints = Array.empty
     }

@@ -15,11 +15,14 @@ type MetricPercentiles = {
 }
 
 /// MetricType represents various metrics, each providing its usefulness depending on the tracked measurement.
-type MetricType =
-    /// Histograms measure the statistical distribution of a set of values including the mean, max, percentiles.
-    | Histogram = 0
+type MetricType =    
     /// A Gauge represents a measure of a value where the value arbitrarily increases or decreases, for example, CPU usage, RAM usage.
     | Gauge = 1
+
+type MetricHistoryValue = {    
+    [<Key 0>] Value: float
+    [<Key 1>] Timestamp: TimeSpan
+}
 
 [<CLIMutable>]
 [<MessagePackObject>]
@@ -27,7 +30,6 @@ type MetricStats = {
     [<Key 0>] Name: string
     [<Key 1>] MeasureUnit: string
     [<Key 2>] MetricType: MetricType
-    [<Key 3>] Current: float    
-    [<Key 4>] Timestamp: TimeSpan
-    [<Key 5>] Percentiles: MetricPercentiles option
+    [<Key 3>] History: MetricHistoryValue list
+    [<Key 4>] Percentiles: MetricPercentiles
 }
