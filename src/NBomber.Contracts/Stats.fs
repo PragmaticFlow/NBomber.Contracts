@@ -190,34 +190,3 @@ type NodeStats = {
     [<CompiledName("GetScenarioStats")>]
     static member getScenarioStats (scenarioName: string) (nodeStats: NodeStats) =
         nodeStats.ScenarioStats |> Array.find(fun x -> x.ScenarioName = scenarioName)
-
-type TimeLineHistoryRecord = {
-    ScenarioStats: ScenarioStats[]
-    Duration: TimeSpan
-}
-
-[<JsonField(EnumValue = EnumMode.Value)>]
-type HintSourceType =
-    | Scenario = 0
-    | WorkerPlugin = 1
-
-type HintResult = {
-    SourceName: string
-    SourceType: HintSourceType
-    Hint: string
-}
-
-type NodeSessionResult = {
-    FinalStats: NodeStats
-    TimeLineHistory: TimeLineHistoryRecord[]
-    Metrics: MetricStats[]
-    Hints: HintResult[]
-} with
-
-    [<CompiledName("Empty")>]
-    static member empty = {
-        FinalStats = NodeStats.empty
-        TimeLineHistory = Array.empty
-        Metrics = Array.empty
-        Hints = Array.empty
-    }
