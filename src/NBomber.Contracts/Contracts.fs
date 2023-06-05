@@ -11,23 +11,20 @@ open NBomber.Contracts.Stats
 type IResponse =
     abstract StatusCode: string
     abstract IsError: bool
-    abstract SizeBytes: int64
-    abstract LatencyMs: float
+    abstract SizeBytes: int64    
     abstract Message: string     
 
 type Response<'T> = {
     StatusCode: string
     IsError: bool
-    SizeBytes: int64
-    LatencyMs: float
+    SizeBytes: int64    
     Message: string
     Payload: 'T option
 } with
     interface IResponse with        
         member this.StatusCode = this.StatusCode
         member this.IsError = this.IsError
-        member this.SizeBytes = this.SizeBytes
-        member this.LatencyMs = this.LatencyMs
+        member this.SizeBytes = this.SizeBytes        
         member this.Message = this.Message
         
 type ScenarioOperation =
