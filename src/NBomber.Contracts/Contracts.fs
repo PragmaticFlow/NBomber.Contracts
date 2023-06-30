@@ -118,8 +118,11 @@ type IScenarioInitContext =
     /// Gets current node info
     abstract NodeInfo: NodeInfo
     
-    /// Gets client settings content from configuration file
+    /// Gets Scenario's custom settings from the configuration file
     abstract CustomSettings: IConfiguration
+    
+    /// Gets Global custom settings from the configuration file
+    abstract GlobalCustomSettings: IConfiguration
     
     /// Gets scenario partition in the cluster.
     /// In the cluster mode, the Coordinator automatically assigns ScenarioPartition to each Agent that runs the same Scenario. 
