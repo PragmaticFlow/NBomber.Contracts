@@ -32,7 +32,8 @@
     </ItemGroup>
 
     <ItemGroup>        
-        <PackageReference Include="FSharp.Json.New" Version="0.4.2" />
+        <PackageReference Include="FSharp.Json.New" Version="0.4.2" />        
+        <PackageReference Include="FSharp.UMX" Version="1.1.0" />
         <PackageReference Include="MessagePack" Version="2.4.59" />
         <PackageReference Include="MessagePack.FSharpExtensions" Version="3.0.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.0" />
