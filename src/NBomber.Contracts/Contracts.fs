@@ -131,13 +131,15 @@ type IScenarioInitContext =
     /// NBomber's logger
     abstract Logger: ILogger
 
-/// LoadSimulation allows configuring parallelism and workload profiles. 
+/// LoadSimulation allows configuring parallelism and workload profiles.
+/// Link for info: https://nbomber.com/docs/nbomber/load-simulation 
 type LoadSimulation =
     /// <summary>
     /// Adds or removes a given number of Scenario copies(instances) with a linear ramp over a given duration.    
     /// Each Scenario copy behaves like a long-running thread that runs continually(by specified duration) and will be destroyed when the current load simulation stops.
     /// Use it for a smooth ramp up and ramp down.
-    /// Usually, this simulation type is used to test databases, message brokers, or any other system that works with a static client's pool of connections and reuses them.        
+    /// Usually, this simulation type is used to test databases, message brokers, or any other system that works with a static client's pool of connections and reuses them.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation 
     /// </summary>
     /// <param name="copies">The number of concurrent Scenario copies that will be running in parallel.</param>
     /// <param name="during">The duration of load simulation.</param>
@@ -147,11 +149,36 @@ type LoadSimulation =
     /// Keeps activated(constantly running) a fixed number of Scenario copies(instances) which executes as many iterations as possible for a specified duration.
     /// Each Scenario copy behaves like a long-running thread that runs continually(by specified duration) and will be destroyed when the current load simulation stops.
     /// Use it when you need to run and keep a constant amount of Scenario copies for a specific period.
-    /// Usually, this simulation type is used to test databases, message brokers, or any other system that works with a static client's pool of connections and reuses them.    
+    /// Usually, this simulation type is used to test databases, message brokers, or any other system that works with a static client's pool of connections and reuses them.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation 
     /// </summary>
     /// <param name="copies">The number of concurrent Scenario copies that will be running in parallel.</param>
     /// <param name="during">The duration of load simulation.</param>
     | KeepConstant of copies:int * during:TimeSpan
+    
+    /// <summary>
+    /// Keeps activated(constantly running) a fixed number of Scenario copies(instances), which executes as many iterations as possible until a specified iteration count.
+    /// Each Scenario copy behaves like a long-running thread that runs continually(by specified duration) and will be destroyed when the current load simulation stops.
+    /// Use it when you need to run and keep a constant amount of Scenario copies for a specific period.
+    /// Usually, this simulation type is used to test databases, message brokers, or any other system that works with a static client's pool of connections and reuses them.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation 
+    /// </summary>
+    /// <param name="copies">The number of concurrent Scenario copies that will be running in parallel.</param>
+    /// <param name="iterations">Total number of Scenario iterations to execute across all Scenario copies.</param>    
+    | TotalConstant of copies:int * iterations:int
+    
+    /// <summary>
+    /// Injects a given number of Scenario copies(instances) until a specified iteration count.
+    /// Each Scenario copy behaves like a short-running thread that runs only once and then is destroyed.
+    /// With this simulation, you control the Scenario injection rate and injection interval.
+    /// Use it when you want to maintain a constant rate of requests without being affected by the performance of the system you load test.
+    /// Usually, this simulation type is used to test HTTP API.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
+    /// </summary>
+    /// <param name="rate">The injection rate of Scenario copies. It configures how many concurrent copies will be injected at a time.</param>
+    /// <param name="interval">The injection interval. It configures the interval between injections. </param>
+    /// <param name="iterations">Total number of Scenario iterations to execute across all Scenario copies.</param>   
+    | TotalInject of rate:int * interval:TimeSpan * iterations:int
     
     /// <summary>
     /// Injects a given number of Scenario copies(instances) with a linear ramp over a given duration.
@@ -159,6 +186,7 @@ type LoadSimulation =
     /// With this simulation, you control the Scenario injection rate and injection interval.
     /// Use it for a smooth ramp up and ramp down.
     /// Usually, this simulation type is used to test HTTP API.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
     /// </summary>
     /// <param name="rate">The injection rate of Scenario copies. It configures how many concurrent copies will be injected at a time.</param>
     /// <param name="interval">The injection interval. It configures the interval between injections. </param>
@@ -171,6 +199,7 @@ type LoadSimulation =
     /// With this simulation, you control the Scenario injection rate and injection interval.
     /// Use it when you want to maintain a constant rate of requests without being affected by the performance of the system you load test.
     /// Usually, this simulation type is used to test HTTP API.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
     /// </summary>
     /// <param name="rate">The injection rate of Scenario copies. It configures how many concurrent copies will be injected at a time.</param>
     /// <param name="interval">The injection interval. It configures the interval between injections. </param>
@@ -183,6 +212,7 @@ type LoadSimulation =
     /// With this simulation, you control the Scenario injection rate and injection interval.
     /// Use it when you want to maintain a random rate of requests without being affected by the performance of the system you load test.
     /// Usually, this simulation type is used to test HTTP API.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
     /// </summary>
     /// <param name="minRate">The min injection rate of Scenario copies.</param>
     /// <param name="maxRate">The max injection rate of Scenario copies.</param>
@@ -193,6 +223,7 @@ type LoadSimulation =
     /// <summary>
     /// Introduces Scenario pause simulation for a given duration.
     /// It's useful for cases when some Scenario start should be delayed or paused in the middle of execution.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
     /// </summary>
     /// <param name="during">The duration of load simulation.</param>
     | Pause of during:TimeSpan
