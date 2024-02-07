@@ -24,11 +24,12 @@
         <Compile Include="Metrics.fs" />
         <Compile Include="Stats.fs" />
         <Compile Include="Contracts.fs" />
+        <Compile Include="Response.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <None Include="../../LICENSE" Pack="true" Visible="false" PackagePath="" />
-        <None Include="../../assets/nbomber_icon.png" Pack="true" Visible="false" PackagePath="" />
+        <None Include="../../assets/nbomber_icon.png" Pack="true" Visible="false" PackagePath="" />        
     </ItemGroup>
 
     <ItemGroup>        
