@@ -65,6 +65,7 @@ type StatusCodeStats = {
     [<Key 1>] IsError: bool
     [<Key 2>] Message: string
     [<Key 3>] Count: int
+    [<Key 4>] Percent: float32
 }
 
 [<CLIMutable>]
@@ -72,6 +73,7 @@ type StatusCodeStats = {
 type RequestStats = {
     [<Key 0>] Count: int
     [<Key 1>] RPS: float
+    [<Key 2>] Percent: float32
 }
 
 [<CLIMutable>]
