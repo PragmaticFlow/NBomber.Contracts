@@ -93,6 +93,7 @@ type IScenarioContext =
     abstract Logger: ILogger
     abstract InvocationNumber: int64    
     abstract Data: Dictionary<string,obj>
+    abstract ScenarioInstanceData: Dictionary<string,obj>
     abstract Random: Random
     abstract StopScenario: scenarioName:string * reason:string -> unit
     abstract StopCurrentTest: reason:string -> unit
