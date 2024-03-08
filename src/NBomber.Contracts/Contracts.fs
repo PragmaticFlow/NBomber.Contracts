@@ -36,8 +36,11 @@ type ScenarioOperation =
 type ScenarioInfo = {
     /// Gets the current scenario thread id.
     /// You can use it as correlation id.
-    ThreadId: string
-    ThreadNumber: int
+    [<Obsolete("Please use InstanceId instead")>] ThreadId: string
+    [<Obsolete("Please use InstanceNumber instead")>] ThreadNumber: int
+    
+    InstanceId: string
+    InstanceNumber: int
     ScenarioName: string
     ScenarioDuration: TimeSpan
     /// Returns info about current operation type.
