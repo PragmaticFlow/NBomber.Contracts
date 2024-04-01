@@ -3,6 +3,7 @@ namespace NBomber.Contracts
 open System
 open System.Collections.Generic
 open System.Data
+open System.Runtime.CompilerServices
 open System.Threading.Tasks
 open Serilog
 open Microsoft.Extensions.Configuration
@@ -353,3 +354,18 @@ type IWorkerPlugin =
 type ApplicationType =
     | Process = 0
     | Console = 1
+    
+[<Extension>]
+type StatsExtensions() =
+
+    [<Extension>]
+    static member Find(statusCodes: StatusCodeStats[], statusCode: string) =
+        statusCodes |> Array.find(fun x -> x.StatusCode = statusCode)
+        
+    [<Extension>]
+    static member Find(scenarioStats: ScenarioStats[], name: string) =
+        scenarioStats |> Array.find(fun x -> x.ScenarioName = name)
+        
+    [<Extension>]
+    static member Find(stepStats: StepStats[], name: string) =
+        stepStats |> Array.find(fun x -> x.StepName = name)    
