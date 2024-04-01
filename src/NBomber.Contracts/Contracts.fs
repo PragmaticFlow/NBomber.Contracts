@@ -359,13 +359,17 @@ type ApplicationType =
 type StatsExtensions() =
 
     [<Extension>]
-    static member Find(statusCodes: StatusCodeStats[], statusCode: string) =
+    static member Get(statusCodes: StatusCodeStats[], statusCode: string) =
         statusCodes |> Array.find(fun x -> x.StatusCode = statusCode)
         
     [<Extension>]
-    static member Find(scenarioStats: ScenarioStats[], name: string) =
+    static member Get(scenarioStats: ScenarioStats[], name: string) =
         scenarioStats |> Array.find(fun x -> x.ScenarioName = name)
         
     [<Extension>]
-    static member Find(stepStats: StepStats[], name: string) =
-        stepStats |> Array.find(fun x -> x.StepName = name)    
+    static member Get(stepStats: StepStats[], name: string) =
+        stepStats |> Array.find(fun x -> x.StepName = name)
+        
+    [<Extension>]
+    static member Exists(stepStats: StepStats[], name: string) =
+        stepStats |> Array.exists(fun x -> x.StepName = name)             
