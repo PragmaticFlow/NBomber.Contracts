@@ -361,7 +361,11 @@ type StatsExtensions() =
     [<Extension>]
     static member Get(statusCodes: StatusCodeStats[], statusCode: string) =
         statusCodes |> Array.find(fun x -> x.StatusCode = statusCode)
-        
+
+    [<Extension>]
+    static member Exists(stepStats: StatusCodeStats[], statusCode: string) =
+        stepStats |> Array.exists(fun x -> x.StatusCode = statusCode)
+            
     [<Extension>]
     static member Get(scenarioStats: ScenarioStats[], name: string) =
         scenarioStats |> Array.find(fun x -> x.ScenarioName = name)
