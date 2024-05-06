@@ -4,8 +4,8 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <Authors>Anton Moldovan</Authors>
         <Company>NBomber</Company>
-        <Version>5.4.0</Version>
-        <Copyright>NBomber@2023</Copyright>
+        <Version>5.5.0-beta.0</Version>
+        <Copyright>NBomber@2024</Copyright>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
