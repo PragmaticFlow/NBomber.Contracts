@@ -126,7 +126,8 @@ type MeasurementStats = {
 type StepStats = {
     [<Key 0>] StepName: string
     [<Key 1>] Ok: MeasurementStats
-    [<Key 2>] Fail: MeasurementStats 
+    [<Key 2>] Fail: MeasurementStats
+    [<Key 3>] IsHidden: bool
 }
 
 [<CLIMutable>]
