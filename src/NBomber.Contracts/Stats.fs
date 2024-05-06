@@ -22,7 +22,8 @@ type TestInfo = {
     [<Key 2>] TestName: string
     [<Key 3>] ClusterId: string
     [<Key 4>] Created: DateTime
-} with
+}
+with
     [<CompiledName("Empty")>]
     static member empty = { SessionId = ""; TestSuite = ""; TestName = ""; ClusterId = ""; Created = DateTime.MinValue }
 
@@ -51,7 +52,8 @@ type NodeInfo = {
     [<Key 5>] Processor: string
     [<Key 6>] CoresCount: int
     [<Key 7>] NBomberVersion: string
-} with
+}
+with
     [<CompiledName("Empty")>]
     static member empty = {
         MachineName = ""; NodeType = NodeType.SingleNode; CurrentOperation = OperationType.None
@@ -150,8 +152,8 @@ type ScenarioStats = {
     [<Key 8>] AllFailCount: int
     [<Key 9>] AllBytes: int64    
     [<Key 10>] Duration: TimeSpan
-} with
-
+}
+with
     member this.GetStepStats(stepName: string) = ScenarioStats.getStepStats stepName this
 
     [<CompiledName("GetStepStats")>]
@@ -177,8 +179,8 @@ type NodeStats = {
     [<Key 7>] AllFailCount: int
     [<Key 8>] AllBytes: int64
     [<Key 9>] Duration: TimeSpan
-} with
-
+}
+with
     member this.GetScenarioStats(scenarioName: string) = NodeStats.getScenarioStats scenarioName this
 
     [<CompiledName("Empty")>]
@@ -192,3 +194,15 @@ type NodeStats = {
     [<CompiledName("GetScenarioStats")>]
     static member getScenarioStats (scenarioName: string) (nodeStats: NodeStats) =
         nodeStats.ScenarioStats |> Array.find(fun x -> x.ScenarioName = scenarioName)
+        
+type ReportData = {
+    ScenarioStats: ScenarioStats[]
+}
+with    
+    member this.GetScenarioStats(scenarioName: string) =
+        this.ScenarioStats |> Array.find(fun x -> x.ScenarioName = scenarioName)
+        
+    [<CompiledName("Create")>]        
+    static member create (scenarioStats) = {
+        ScenarioStats = scenarioStats
+    }        

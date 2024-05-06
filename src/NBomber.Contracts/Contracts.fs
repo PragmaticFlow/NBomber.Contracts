@@ -21,7 +21,8 @@ type Response<'T> = {
     SizeBytes: int64    
     Message: string
     Payload: 'T option
-} with
+}
+with
     interface IResponse with        
         member this.StatusCode = this.StatusCode
         member this.IsError = this.IsError
@@ -110,7 +111,8 @@ type ScenarioPartition = {
     
     /// Gets scenario partitions count in the cluster.
     Count: int
-} with
+}
+with
     [<CompiledName("Empty")>]
     static member empty = { Number = 1; Count = 1 }
 
@@ -354,8 +356,7 @@ type IWorkerPlugin =
 type ApplicationType =
     | Process = 0
     | Console = 1
-    
-[<Extension>]
+
 type StatsExtensions() =
 
     [<Extension>]
