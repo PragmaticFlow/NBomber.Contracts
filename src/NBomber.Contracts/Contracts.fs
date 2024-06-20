@@ -97,16 +97,29 @@ type IScenarioContext =
     abstract ScenarioInfo: ScenarioInfo
     abstract NodeInfo: NodeInfo
     abstract Logger: ILogger
-    abstract InvocationNumber: int64    
+    
+    /// Represent the current Scenario instance invocation number. It starts from 1.
+    abstract InvocationNumber: int64
+    
+    /// A dictionary that stores Scenario instance data and cleans it after Scenario iteration.
+    /// It can be used to share some data between steps.
     abstract Data: Dictionary<string,obj>
+    
+    /// A dictionary that stores Scenario instance data and keep it for the whole scenario duration.
+    /// It can be used to model Virtual User data that bound to Scenario instance. 
     abstract ScenarioInstanceData: Dictionary<string,obj>
     
     /// Indicates that scenario execution is finished or canceled.
     /// You can listen to changes via ScenarioCancellationToken.IsCancellationRequested.
     abstract ScenarioCancellationToken: CancellationToken
-    
+
+    /// Represent the basic .NET Random that should be used to introduce dynamic behavior. 
     abstract Random: Random
+    
+    /// Stops the specified scenario. In the cluster mode, NBomber will stop the specified scenario on all nodes.
     abstract StopScenario: scenarioName:string * reason:string -> unit
+    
+    /// Stops all scenarios. In the cluster mode, NBomber will stop all scenarios on all nodes.
     abstract StopCurrentTest: reason:string -> unit
 
 /// Represents scenario partition.
