@@ -101,7 +101,7 @@ type IScenarioContext =
     abstract Data: Dictionary<string,obj>
     abstract ScenarioInstanceData: Dictionary<string,obj>
     
-    /// Scenario Cancellation Token - indicates that scenario execution is finished or canceled.
+    /// Indicates that scenario execution is finished or canceled.
     /// You can listen to changes via ScenarioCancellationToken.IsCancellationRequested.
     abstract ScenarioCancellationToken: CancellationToken
     
