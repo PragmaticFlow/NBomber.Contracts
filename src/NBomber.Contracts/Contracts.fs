@@ -256,8 +256,7 @@ type LoadSimulation =
 type ScenarioProps = {
     ScenarioName: string
     Init: (IScenarioInitContext -> Task) option
-    Clean: (IScenarioInitContext -> Task) option
-    Finish: (IScenarioInitContext -> Task) option
+    Clean: (IScenarioInitContext -> Task) option    
     Run: (IScenarioContext -> Task<IResponse>) option
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
