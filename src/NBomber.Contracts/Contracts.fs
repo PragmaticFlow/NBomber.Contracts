@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open System.Data
 open System.Runtime.CompilerServices
+open System.Threading
 open System.Threading.Tasks
 open Serilog
 open Microsoft.Extensions.Configuration
@@ -99,6 +100,11 @@ type IScenarioContext =
     abstract InvocationNumber: int64    
     abstract Data: Dictionary<string,obj>
     abstract ScenarioInstanceData: Dictionary<string,obj>
+    
+    /// Scenario Cancellation Token - indicates that scenario execution is finished or cancelled.
+    /// You can listen on changes via CancellationToken.IsCancellationRequested.
+    abstract ScenarioCancellationToken: CancellationToken
+    
     abstract Random: Random
     abstract StopScenario: scenarioName:string * reason:string -> unit
     abstract StopCurrentTest: reason:string -> unit
