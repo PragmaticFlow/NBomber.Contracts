@@ -95,6 +95,9 @@ type IBaseContext =
 type IScenarioContext =
     abstract TestInfo: TestInfo
     abstract ScenarioInfo: ScenarioInfo
+    
+    /// Returns information about the current node, node role, etc.
+    /// For example, you can use it to get node roles: Coordinator, Agent, or SingleNode.
     abstract NodeInfo: NodeInfo
     abstract Logger: ILogger
     
