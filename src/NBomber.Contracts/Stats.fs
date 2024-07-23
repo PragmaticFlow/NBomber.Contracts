@@ -194,7 +194,8 @@ with
     [<CompiledName("GetScenarioStats")>]
     static member getScenarioStats (scenarioName: string) (nodeStats: NodeStats) =
         nodeStats.ScenarioStats |> Array.find(fun x -> x.ScenarioName = scenarioName)
-        
+    
+[<CLIMutable>]        
 type ReportData = {
     ScenarioStats: ScenarioStats[]
 }
