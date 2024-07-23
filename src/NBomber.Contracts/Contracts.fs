@@ -278,6 +278,7 @@ type ScenarioProps = {
     LoadSimulations: LoadSimulation list
     RestartIterationOnFail: bool
     MaxFailCount: int
+    Probability: int
 }
 
 /// ReportingSink provides functionality for saving real-time and final statistics.
