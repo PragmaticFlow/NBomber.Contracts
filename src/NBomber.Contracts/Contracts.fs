@@ -269,6 +269,39 @@ type LoadSimulation =
     /// <param name="during">The duration of load simulation.</param>
     | Pause of during:TimeSpan
 
+type ThresholdType =
+    | Errors
+    | Request
+    | Latency
+    | DataTransfer
+    | StatusCode of statusCode:string
+    
+type ThresholdMetric =
+    | Min
+    | Max
+    | Mean
+    | P50
+    | P75
+    | P95
+    | P99
+    | Count
+    | RPS
+    | Rate
+    | Percent
+
+/// <summary>
+/// Thresholds are the pass/fail criteria that you define for your test metrics.
+/// If the performance of the system under test does not meet the conditions of your threshold, the test finishes with a failed status.
+/// </summary>
+type Threshold = {
+    StepName: string
+    Type: ThresholdType
+    Metric: ThresholdMetric
+    Operator: string
+    Value: float
+    AbortOnFail: bool
+}
+
 type ScenarioProps = {
     ScenarioName: string
     Init: (IScenarioInitContext -> Task) option
@@ -279,6 +312,7 @@ type ScenarioProps = {
     RestartIterationOnFail: bool
     MaxFailCount: int
     Weight: int option
+    Thresholds: Threshold list
 }
 
 /// ReportingSink provides functionality for saving real-time and final statistics.
