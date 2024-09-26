@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open System.Data
 open System.Runtime.CompilerServices
+open System.Runtime.InteropServices
 open System.Threading
 open System.Threading.Tasks
 open Serilog
@@ -269,39 +270,52 @@ type LoadSimulation =
     /// <param name="during">The duration of load simulation.</param>
     | Pause of during:TimeSpan
 
-type ThresholdType =
-    | Errors
-    | Request
-    | Latency
-    | DataTransfer
-    | StatusCode of statusCode:string
-    
-type ThresholdMetric =
-    | Min
-    | Max
-    | Mean
-    | P50
-    | P75
-    | P95
-    | P99
-    | Count
-    | RPS
-    | Rate
-    | Percent
-
 /// <summary>
 /// Thresholds are the pass/fail criteria that you define for your test metrics.
-/// If the performance of the system under test does not meet the conditions of your threshold, the test finishes with a failed status.
+/// The runtime thresholds will be executed periodically to check real-time and final metrics for Scenario and Step.
 /// </summary>
-type Threshold = {
-    StepName: string
-    Type: ThresholdType
-    Metric: ThresholdMetric
-    Operator: string
-    Value: float
-    AbortOnFail: bool
-}
-
+type Threshold private (stepName: string,
+                        checkStep: Func<StepStats, bool>,
+                        checkScenario: Func<ScenarioStats, bool>,
+                        abortWhenErrorCount: Nullable<int>,
+                        startCheckFrom: Nullable<TimeSpan>) =
+    
+    member this.StepName = stepName
+    member this.CheckStep = checkStep
+    member this.CheckScenario = checkScenario    
+    member this.AbortWhenErrorCount = abortWhenErrorCount
+    member this.StartCheckFrom = startCheckFrom    
+    
+    /// <summary>
+    /// Creates a runtime threshold.
+    /// Thresholds are the pass/fail criteria that you define for your test metrics.
+    /// </summary>
+    /// <param name="checkScenario">Specifies the threshold check function. This function is executed periodically to monitor and check metrics.</param>
+    /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the execution.</param>
+    /// <param name="startCheckFrom">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
+    [<CompiledName("Create")>]
+    static member create (checkScenario: Func<ScenarioStats, bool>,
+                          [<Optional;DefaultParameterValue(Nullable<int>())>] abortWhenErrorCount: Nullable<int>,
+                          [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckFrom: Nullable<TimeSpan>) =
+        
+        Threshold("", Unchecked.defaultof<_>, checkScenario, abortWhenErrorCount, startCheckFrom)
+         
+    /// <summary>
+    /// Creates a runtime threshold.
+    /// Thresholds are the pass/fail criteria that you define for your test metrics.
+    /// </summary>
+    /// <param name="stepName">Specifies StepName for the current Scenario's threshold.</param>
+    /// <param name="checkStep">Specifies the threshold check function. This function is executed periodically to monitor and check metrics.</param>
+    /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the execution.</param>
+    /// <param name="startCheckFrom">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
+    [<CompiledName("Create")>]         
+    static member create (stepName: string,
+                          checkStep: Func<StepStats, bool>,
+                          [<Optional;DefaultParameterValue(Nullable<int>())>] abortWhenErrorCount: Nullable<int>,
+                          [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckFrom: Nullable<TimeSpan>) =
+        
+        Threshold(stepName, checkStep, Unchecked.defaultof<_>, abortWhenErrorCount, startCheckFrom)    
+        
 type ScenarioProps = {
     ScenarioName: string
     Init: (IScenarioInitContext -> Task) option
@@ -309,10 +323,10 @@ type ScenarioProps = {
     Run: (IScenarioContext -> Task<IResponse>) option
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
+    Thresholds: Threshold list
     RestartIterationOnFail: bool
     MaxFailCount: int
     Weight: int option
-    Thresholds: Threshold list
 }
 
 /// ReportingSink provides functionality for saving real-time and final statistics.
@@ -414,24 +428,76 @@ type ApplicationType =
     | Process = 0
     | Console = 1
 
-type StatsExtensions() =
-
+type StatsExtensions() =    
+    
+    static let rec findStatus (stats: StatusCodeStats[]) (code: string) (index: int) =
+        if stats[index].StatusCode = code then
+            ValueSome stats[index]
+        elif index >= stats.Length - 1 then
+            ValueNone
+        else
+            findStatus stats code (index + 1)
+            
+    static let rec findScenario (stats: ScenarioStats[]) (name: string) (index: int) =
+        if stats[index].ScenarioName = name then
+            ValueSome stats[index]
+        elif index >= stats.Length - 1 then
+            ValueNone
+        else
+            findScenario stats name (index + 1)
+            
+    static let rec findStep (stats: StepStats[]) (name: string) (index: int) =
+        if stats[index].StepName = name then
+            ValueSome stats[index]
+        elif index >= stats.Length - 1 then
+            ValueNone
+        else
+            findStep stats name (index + 1)            
+    
     [<Extension>]
     static member Get(statusCodes: StatusCodeStats[], statusCode: string) =
-        statusCodes |> Array.find(fun x -> x.StatusCode = statusCode)
+        match findStatus statusCodes statusCode 0 with
+        | ValueSome v -> v
+        | ValueNone   -> raise (KeyNotFoundException $"Status code: '{statusCode}' is not found.") 
+        
+    [<Extension>]
+    static member Find(statusCodes: StatusCodeStats[], statusCode: string) =
+        findStatus statusCodes statusCode 0
+        |> ValueOption.defaultValue(Unchecked.defaultof<_>)        
 
     [<Extension>]
-    static member Exists(stepStats: StatusCodeStats[], statusCode: string) =
-        stepStats |> Array.exists(fun x -> x.StatusCode = statusCode)
+    static member Exists(statusCodes: StatusCodeStats[], statusCode: string) =
+        findStatus statusCodes statusCode 0
+        |> ValueOption.isSome
             
     [<Extension>]
     static member Get(scenarioStats: ScenarioStats[], name: string) =
-        scenarioStats |> Array.find(fun x -> x.ScenarioName = name)
+        match findScenario scenarioStats name 0 with        
+        | ValueSome v -> v
+        | ValueNone   -> raise (KeyNotFoundException $"Scenario: '{name}' is not found.")                
+            
+    [<Extension>]
+    static member Find(scenarioStats: ScenarioStats[], name: string) =
+        findScenario scenarioStats name 0
+        |> ValueOption.defaultValue(Unchecked.defaultof<_>)
         
     [<Extension>]
-    static member Get(stepStats: StepStats[], name: string) =
-        stepStats |> Array.find(fun x -> x.StepName = name)
+    static member Exists(scenarioStats: ScenarioStats[], name: string) =
+        findScenario scenarioStats name 0
+        |> ValueOption.isSome
+        
+    [<Extension>]
+    static member Get(stepStats: StepStats[], name: string) =        
+        match findStep stepStats name 0 with        
+        | ValueSome v -> v
+        | ValueNone   -> raise (KeyNotFoundException $"Step: '{name}' is not found.")         
+            
+    [<Extension>]
+    static member Find(stepStats: StepStats[], name: string) =
+        findStep stepStats name 0
+        |> ValueOption.defaultValue(Unchecked.defaultof<_>)        
         
     [<Extension>]
     static member Exists(stepStats: StepStats[], name: string) =
-        stepStats |> Array.exists(fun x -> x.StepName = name)             
+        findStep stepStats name 0
+        |> ValueOption.isSome            

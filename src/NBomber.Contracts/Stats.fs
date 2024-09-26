@@ -1,5 +1,7 @@
 ﻿namespace NBomber.Contracts.Stats
 
+#nowarn "0044"
+
 open System
 open System.Data
 
@@ -140,7 +142,7 @@ type LoadSimulationStats = {
 
 [<CLIMutable>]
 [<MessagePackObject>]
-type ScenarioStats = {
+type ScenarioStats = {    
     [<Key 0>] ScenarioName: string     
     [<Key 1>] Ok: MeasurementStats
     [<Key 2>] Fail: MeasurementStats
@@ -154,11 +156,24 @@ type ScenarioStats = {
     [<Key 10>] Duration: TimeSpan
 }
 with
+    [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.StepStats.Get(name)")>]
     member this.GetStepStats(stepName: string) = ScenarioStats.getStepStats stepName this
+    
+    [<Obsolete("Please use extension method 'Find(name)' instead. Example: data.StepStats.Find(name)")>]
+    member this.FindStepStats(stepName: string) = ScenarioStats.findStepStats stepName this
 
+    [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.StepStats.Get(name)")>]
     [<CompiledName("GetStepStats")>]
     static member getStepStats (stepName: string) (scenarioStats: ScenarioStats) =
-        scenarioStats.StepStats |> Array.find(fun x -> x.StepName = stepName)
+        scenarioStats.StepStats
+        |> Array.find(fun x -> x.StepName = stepName)
+        
+    [<Obsolete("Please use extension method 'Find(name)' instead. Example: data.StepStats.Find(name)")>]        
+    [<CompiledName("FindStepStats")>]
+    static member findStepStats (stepName: string) (scenarioStats: ScenarioStats) =
+        scenarioStats.StepStats
+        |> Array.tryFind(fun x -> x.StepName = stepName)
+        |> Option.defaultValue(Unchecked.defaultof<_>)        
 
 type ReportFile = {
     FilePath: string
@@ -166,42 +181,75 @@ type ReportFile = {
     ReportContent: string
 }
 
+type ThresholdResult = {
+    ScenarioName: string
+    StepName: string
+    CheckExpression: string
+    ExceptionMsg: string
+    ErrorCount: int
+    IsFailed: bool
+}
+
 [<CLIMutable>]
 [<MessagePackObject>]
-type NodeStats = {    
-    [<Key 0>] ScenarioStats: ScenarioStats[]    
+type NodeStats = {
+    [<Key 0>] ScenarioStats: ScenarioStats[]
+    [<IgnoreMember>] Thresholds: ThresholdResult[]
     [<IgnoreMember>] [<JsonField(Transform=typeof<DateTableTransform>)>] PluginStats: DataSet[]
-    [<Key 2>] NodeInfo: NodeInfo
-    [<Key 3>] TestInfo: TestInfo
+    [<Key 1>] NodeInfo: NodeInfo
+    [<Key 2>] TestInfo: TestInfo
     [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 5>] AllRequestCount: int
-    [<Key 6>] AllOkCount: int
-    [<Key 7>] AllFailCount: int
-    [<Key 8>] AllBytes: int64
-    [<Key 9>] Duration: TimeSpan
+    [<Key 3>] AllRequestCount: int
+    [<Key 4>] AllOkCount: int
+    [<Key 5>] AllFailCount: int
+    [<Key 6>] AllBytes: int64
+    [<Key 7>] Duration: TimeSpan
 }
 with
+    [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.ScenarioStats.Get(name)")>]
     member this.GetScenarioStats(scenarioName: string) = NodeStats.getScenarioStats scenarioName this
+    
+    [<Obsolete("Please use extension method 'Find(name)' instead. Example: data.ScenarioStats.Find(name)")>]
+    member this.FindScenarioStats(scenarioName: string) = NodeStats.findScenarioStats scenarioName this
 
     [<CompiledName("Empty")>]
     static member empty = {        
-        ScenarioStats = Array.empty; PluginStats = Array.empty
+        ScenarioStats = Array.empty
+        Thresholds = Array.empty
+        PluginStats = Array.empty
         NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty; ReportFiles = Array.empty
         AllRequestCount = 0; AllOkCount = 0; AllFailCount = 0; AllBytes = 0                
         Duration = TimeSpan.Zero
     }
 
+    [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.ScenarioStats.Get(name)")>]
     [<CompiledName("GetScenarioStats")>]
     static member getScenarioStats (scenarioName: string) (nodeStats: NodeStats) =
-        nodeStats.ScenarioStats |> Array.find(fun x -> x.ScenarioName = scenarioName)
+        nodeStats.ScenarioStats
+        |> Array.find(fun x -> x.ScenarioName = scenarioName)        
+        
+    [<Obsolete("Please use extension method 'Find(name)' instead. Example: data.ScenarioStats.Find(name)")>]        
+    [<CompiledName("FindScenarioStats")>]
+    static member findScenarioStats (scenarioName: string) (nodeStats: NodeStats) =
+        nodeStats.ScenarioStats
+        |> Array.tryFind(fun x -> x.ScenarioName = scenarioName)
+        |> Option.defaultValue(Unchecked.defaultof<_>)        
     
 [<CLIMutable>]        
 type ReportData = {
     ScenarioStats: ScenarioStats[]
 }
-with    
+with
+    [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.ScenarioStats.Get(name)")>]
     member this.GetScenarioStats(scenarioName: string) =
-        this.ScenarioStats |> Array.find(fun x -> x.ScenarioName = scenarioName)
+        this.ScenarioStats
+        |> Array.find(fun x -> x.ScenarioName = scenarioName)        
+        
+    [<Obsolete("Please use extension method 'Find(name)' instead. Example: data.ScenarioStats.Find(name)")>]        
+    member this.FindScenarioStats(scenarioName: string) =
+        this.ScenarioStats
+        |> Array.tryFind(fun x -> x.ScenarioName = scenarioName)
+        |> Option.defaultValue(Unchecked.defaultof<_>)        
         
     [<CompiledName("Create")>]        
     static member create (scenarioStats) = {
