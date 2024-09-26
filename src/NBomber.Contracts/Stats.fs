@@ -131,7 +131,7 @@ type StepStats = {
     [<Key 0>] StepName: string
     [<Key 1>] Ok: MeasurementStats
     [<Key 2>] Fail: MeasurementStats
-    [<Key 3>] IndexNumber: int
+    [<Key 3>] SortIndex: int
 }
 
 [<CLIMutable>]
@@ -155,7 +155,7 @@ type ScenarioStats = {
     [<Key 8>] AllFailCount: int
     [<Key 9>] AllBytes: int64    
     [<Key 10>] Duration: TimeSpan
-    [<Key 11>] IndexNumber: int
+    [<Key 11>] SortIndex: int
 }
 with
     [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.StepStats.Get(name)")>]
