@@ -329,6 +329,15 @@ type ScenarioProps = {
     Weight: int option
 }
 
+type ScenarioStartInfo = {
+    ScenarioName: string
+    ScenarioIndex: int
+}
+
+type SessionStartInfo = {
+    Scenarios: ScenarioStartInfo[]   
+}
+
 /// ReportingSink provides functionality for saving real-time and final statistics.
 type IReportingSink =
     inherit IDisposable
@@ -343,16 +352,10 @@ type IReportingSink =
     abstract Init: context:IBaseContext * infraConfig:IConfiguration -> Task
     
     /// <summary>
-    /// Starts execution and saves a metric representing the load test's START.
-    /// This method will be invoked two times: for a warm-up(if it's enabled) and the bombing.    
+    /// Starts execution, signifying the START event of the load test session.    
     /// </summary>
-    /// <example>
-    /// <code>
-    /// // to get info about the current operation:    
-    /// IBaseContext.GetNodeInfo().CurrentOperation == OperationType.WarmUp    
-    /// </code>
-    /// </example>
-    abstract Start: unit -> Task
+    /// <param name="sessionInfo">Represent session information about startup Scenarios</param>    
+    abstract Start: sessionInfo:SessionStartInfo -> Task
     
     /// <summary>
     /// Saves real-time stats data.
@@ -369,17 +372,9 @@ type IReportingSink =
     abstract SaveFinalStats: stats:NodeStats -> Task
     
     /// <summary>
-    /// Stops execution and saves a metric representing the load test's STOP.    
-    /// This method will be invoked two times: for a warm-up(if it's enabled) and the bombing.
-    /// By default, this method shouldn't execute any logic related to cleaning ReportingSink's resources, opened connections, etc.
-    /// To clean resources, ReportingSink implements the IDisposal interface. 
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// // to get info about the current operation:    
-    /// IBaseContext.GetNodeInfo().CurrentOperation == OperationType.WarmUp    
-    /// </code>
-    /// </example>
+    /// Ends execution and records a metric representing the STOP event of the load test.    
+    /// This method can also be used to clean up resources, such as database connections. 
+    /// </summary>    
     abstract Stop: unit -> Task
 
 /// WorkerPlugin provides functionality for building background workers.
@@ -398,30 +393,18 @@ type IWorkerPlugin =
     abstract Init: context:IBaseContext * infraConfig:IConfiguration -> Task
     
     /// <summary>
-    /// Starts execution.
-    /// This method will be invoked two times: for a warm-up(if it's enabled) and the bombing.
-    /// </summary>    
-    /// <example>
-    /// <code>
-    /// // to get info about the current operation:    
-    /// IBaseContext.GetNodeInfo().CurrentOperation == OperationType.WarmUp    
-    /// </code>
-    /// </example>
-    abstract Start: unit -> Task
+    /// Starts execution, signifying the START event of the load test session.
+    /// </summary>
+    /// <param name="sessionInfo">Represent session information about startup Scenarios</param>
+    abstract Start: sessionInfo:SessionStartInfo -> Task
     
     abstract GetStats: stats:NodeStats -> Task<DataSet>
     abstract GetHints: unit -> string[]
     
     /// <summary>
-    /// Stops execution.
-    /// This method will be invoked two times: for a warm-up(if it's enabled) and the bombing.
-    /// </summary>    
-    /// <example>
-    /// <code>
-    /// // to get info about the current operation:    
-    /// IBaseContext.GetNodeInfo().CurrentOperation == OperationType.WarmUp    
-    /// </code>
-    /// </example>
+    /// Ends execution.    
+    /// This method can also be used to clean up resources, such as database connections.     
+    /// </summary>
     abstract Stop: unit -> Task
 
 type ApplicationType =
