@@ -331,7 +331,7 @@ type ScenarioProps = {
 
 type ScenarioStartInfo = {
     ScenarioName: string
-    ScenarioIndex: int
+    SortIndex: int
 }
 
 type SessionStartInfo = {
