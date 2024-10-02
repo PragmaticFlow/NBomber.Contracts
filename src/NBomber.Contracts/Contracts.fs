@@ -291,7 +291,7 @@ type Threshold private (stepName: string,
     /// Thresholds are the pass/fail criteria that you define for your test metrics.
     /// </summary>
     /// <param name="checkScenario">Specifies the threshold check function. This function is executed periodically to monitor and check metrics.</param>
-    /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the execution.</param>
+    /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the session earlier. The default value is null, meaning NBomber will not end the session early, even if the failed thresholds are met.</param>
     /// <param name="startCheckFrom">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
     [<CompiledName("Create")>]
     static member create (checkScenario: Func<ScenarioStats, bool>,
@@ -306,7 +306,7 @@ type Threshold private (stepName: string,
     /// </summary>
     /// <param name="stepName">Specifies StepName for the current Scenario's threshold.</param>
     /// <param name="checkStep">Specifies the threshold check function. This function is executed periodically to monitor and check metrics.</param>
-    /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the execution.</param>
+    /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the session earlier. The default value is null, meaning NBomber will not end the session early, even if the failed thresholds are met.</param>
     /// <param name="startCheckFrom">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
     [<CompiledName("Create")>]         
     static member create (stepName: string,
@@ -431,7 +431,9 @@ type ApplicationType =
 type StatsExtensions() =    
     
     static let rec findStatus (stats: StatusCodeStats[]) (code: string) (index: int) =
-        if stats[index].StatusCode = code then
+        if stats.Length = 0 then
+            ValueNone
+        elif stats[index].StatusCode = code then
             ValueSome stats[index]
         elif index >= stats.Length - 1 then
             ValueNone
@@ -439,7 +441,9 @@ type StatsExtensions() =
             findStatus stats code (index + 1)
             
     static let rec findScenario (stats: ScenarioStats[]) (name: string) (index: int) =
-        if stats[index].ScenarioName = name then
+        if stats.Length = 0 then
+            ValueNone
+        elif stats[index].ScenarioName = name then
             ValueSome stats[index]
         elif index >= stats.Length - 1 then
             ValueNone
@@ -447,7 +451,9 @@ type StatsExtensions() =
             findScenario stats name (index + 1)
             
     static let rec findStep (stats: StepStats[]) (name: string) (index: int) =
-        if stats[index].StepName = name then
+        if stats.Length = 0 then
+            ValueNone
+        elif stats[index].StepName = name then
             ValueSome stats[index]
         elif index >= stats.Length - 1 then
             ValueNone
