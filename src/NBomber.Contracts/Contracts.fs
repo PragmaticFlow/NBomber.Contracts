@@ -1,5 +1,7 @@
 namespace NBomber.Contracts
 
+#nowarn "3211"
+
 open System
 open System.Collections.Generic
 open System.Data
@@ -355,7 +357,7 @@ type IReportingSink =
     /// Starts execution, signifying the START event of the load test session.    
     /// </summary>
     /// <param name="sessionInfo">Represent session information about startup Scenarios</param>    
-    abstract Start: sessionInfo:SessionStartInfo -> Task
+    abstract Start: [<Optional;DefaultParameterValue(null)>] sessionInfo:SessionStartInfo -> Task
     
     /// <summary>
     /// Saves real-time stats data.
@@ -396,7 +398,7 @@ type IWorkerPlugin =
     /// Starts execution, signifying the START event of the load test session.
     /// </summary>
     /// <param name="sessionInfo">Represent session information about startup Scenarios</param>
-    abstract Start: sessionInfo:SessionStartInfo -> Task
+    abstract Start: [<Optional;DefaultParameterValue(null)>] sessionInfo:SessionStartInfo -> Task
     
     abstract GetStats: stats:NodeStats -> Task<DataSet>
     abstract GetHints: unit -> string[]
