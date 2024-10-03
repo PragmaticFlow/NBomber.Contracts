@@ -329,11 +329,13 @@ type ScenarioProps = {
     Weight: int option
 }
 
+/// Provides details about the Scenario that is scheduled to start.
 type ScenarioStartInfo = {
     ScenarioName: string
     SortIndex: int
 }
 
+/// Provides session details about the Scenarios that are scheduled to start.
 type SessionStartInfo = {
     Scenarios: ScenarioStartInfo[]   
 }
@@ -354,7 +356,7 @@ type IReportingSink =
     /// <summary>
     /// Starts execution, signifying the START event of the load test session.    
     /// </summary>
-    /// <param name="sessionInfo">Represent session information about startup Scenarios</param>    
+    /// <param name="sessionInfo">Provides session details about the Scenarios that are scheduled to start</param>    
     abstract Start: sessionInfo:SessionStartInfo -> Task
     
     /// <summary>
@@ -395,7 +397,7 @@ type IWorkerPlugin =
     /// <summary>
     /// Starts execution, signifying the START event of the load test session.
     /// </summary>
-    /// <param name="sessionInfo">Represent session information about startup Scenarios</param>
+    /// <param name="sessionInfo">Provides session details about the Scenarios that are scheduled to start</param>
     abstract Start: sessionInfo:SessionStartInfo -> Task
     
     abstract GetStats: stats:NodeStats -> Task<DataSet>
@@ -414,32 +416,26 @@ type ApplicationType =
 type StatsExtensions() =    
     
     static let rec findStatus (stats: StatusCodeStats[]) (code: string) (index: int) =
-        if stats.Length = 0 then
+        if index >= stats.Length then
             ValueNone
         elif stats[index].StatusCode = code then
-            ValueSome stats[index]
-        elif index >= stats.Length - 1 then
-            ValueNone
+            ValueSome stats[index]        
         else
             findStatus stats code (index + 1)
             
     static let rec findScenario (stats: ScenarioStats[]) (name: string) (index: int) =
-        if stats.Length = 0 then
+        if index >= stats.Length then
             ValueNone
         elif stats[index].ScenarioName = name then
-            ValueSome stats[index]
-        elif index >= stats.Length - 1 then
-            ValueNone
+            ValueSome stats[index]        
         else
             findScenario stats name (index + 1)
             
     static let rec findStep (stats: StepStats[]) (name: string) (index: int) =
-        if stats.Length = 0 then
+        if index >= stats.Length then
             ValueNone
         elif stats[index].StepName = name then
-            ValueSome stats[index]
-        elif index >= stats.Length - 1 then
-            ValueNone
+            ValueSome stats[index]        
         else
             findStep stats name (index + 1)            
     
