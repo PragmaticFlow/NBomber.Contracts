@@ -278,13 +278,13 @@ type Threshold private (stepName: string,
                         checkStep: Func<StepStats, bool>,
                         checkScenario: Func<ScenarioStats, bool>,
                         abortWhenErrorCount: Nullable<int>,
-                        startCheckFrom: Nullable<TimeSpan>) =
+                        startCheckAfter: Nullable<TimeSpan>) =
     
     member this.StepName = stepName
     member this.CheckStep = checkStep
     member this.CheckScenario = checkScenario    
     member this.AbortWhenErrorCount = abortWhenErrorCount
-    member this.StartCheckFrom = startCheckFrom    
+    member this.StartCheckAfter = startCheckAfter    
     
     /// <summary>
     /// Creates a runtime threshold.
@@ -292,13 +292,13 @@ type Threshold private (stepName: string,
     /// </summary>
     /// <param name="checkScenario">Specifies the threshold check function. This function is executed periodically to monitor and check metrics.</param>
     /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the session earlier. The default value is null, meaning NBomber will not end the session early, even if the failed thresholds are met.</param>
-    /// <param name="startCheckFrom">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
+    /// <param name="startCheckAfter">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
     [<CompiledName("Create")>]
     static member create (checkScenario: Func<ScenarioStats, bool>,
                           [<Optional;DefaultParameterValue(Nullable<int>())>] abortWhenErrorCount: Nullable<int>,
-                          [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckFrom: Nullable<TimeSpan>) =
+                          [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckAfter: Nullable<TimeSpan>) =
         
-        Threshold("", Unchecked.defaultof<_>, checkScenario, abortWhenErrorCount, startCheckFrom)
+        Threshold("", Unchecked.defaultof<_>, checkScenario, abortWhenErrorCount, startCheckAfter)
          
     /// <summary>
     /// Creates a runtime threshold.
@@ -307,14 +307,14 @@ type Threshold private (stepName: string,
     /// <param name="stepName">Specifies StepName for the current Scenario's threshold.</param>
     /// <param name="checkStep">Specifies the threshold check function. This function is executed periodically to monitor and check metrics.</param>
     /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the session earlier. The default value is null, meaning NBomber will not end the session early, even if the failed thresholds are met.</param>
-    /// <param name="startCheckFrom">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
+    /// <param name="startCheckAfter">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
     [<CompiledName("Create")>]         
     static member create (stepName: string,
                           checkStep: Func<StepStats, bool>,
                           [<Optional;DefaultParameterValue(Nullable<int>())>] abortWhenErrorCount: Nullable<int>,
-                          [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckFrom: Nullable<TimeSpan>) =
+                          [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckAfter: Nullable<TimeSpan>) =
         
-        Threshold(stepName, checkStep, Unchecked.defaultof<_>, abortWhenErrorCount, startCheckFrom)    
+        Threshold(stepName, checkStep, Unchecked.defaultof<_>, abortWhenErrorCount, startCheckAfter)    
         
 type ScenarioProps = {
     ScenarioName: string
