@@ -27,12 +27,21 @@ module internal ResponseInternal =
 
 type Response =
 
+    /// Returns an empty successful response with no payload.
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member ok () = ResponseInternal.okEmpty
 
+    /// Returns an empty failure response with no payload.
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member fail () = ResponseInternal.failEmpty<obj>
 
+    /// <summary>
+    /// Returns a successful response.
+    /// </summary>
+    /// <param name="payload">Optional payload.</param>
+    /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
+    /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
     static member inline ok<'T>(
         ?payload: 'T,
         ?statusCode: string,
@@ -45,6 +54,13 @@ type Response =
           Message = message |> Option.defaultValue ""
           Payload = payload }
 
+    /// <summary>
+    /// Returns a failure response.
+    /// </summary>
+    /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
+    /// <param name="payload">Optional payload.</param>
+    /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
     static member inline fail<'T>(
         ?statusCode: string,
         ?message: string,
@@ -67,12 +83,20 @@ open NBomber.FSharp
 
 type Response =
 
+    /// Returns an empty successful response with no payload.
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Ok() = ResponseInternal.okEmpty
 
+    /// Returns an empty failure response with no payload.
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Fail() = ResponseInternal.failEmpty<obj>
-
+    
+    /// <summary>
+    /// Returns a successful response.
+    /// </summary>
+    /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
+    /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>    
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Ok(
         [<Optional;DefaultParameterValue("")>] statusCode: string,
@@ -85,6 +109,12 @@ type Response =
           Message = if isNull message then String.Empty else message
           Payload = None }
 
+    /// <summary>
+    /// Returns a successful response.
+    /// </summary>
+    /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
+    /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Ok<'T>(
         [<Optional;DefaultParameterValue("")>] statusCode: string,
@@ -97,6 +127,13 @@ type Response =
           Message = if isNull message then String.Empty else message
           Payload = None }
 
+    /// <summary>
+    /// Returns a successful response.
+    /// </summary>
+    /// <param name="payload">Optional payload.</param>
+    /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
+    /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>    
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Ok<'T>(
         payload: 'T,
@@ -110,6 +147,12 @@ type Response =
           Message = if isNull message then String.Empty else message
           Payload = Some payload }
 
+    /// <summary>
+    /// Returns a failure response.
+    /// </summary>    
+    /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>    
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
+    /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Fail(
         [<Optional;DefaultParameterValue("")>] statusCode: string,
@@ -122,6 +165,12 @@ type Response =
           Message = if isNull message then String.Empty else message
           Payload = None }
 
+    /// <summary>
+    /// Returns a failure response.
+    /// </summary>    
+    /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
+    /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Fail<'T>(
         [<Optional;DefaultParameterValue("")>] statusCode: string,
@@ -134,6 +183,13 @@ type Response =
           Message = if isNull message then String.Empty else message
           Payload = None }
 
+    /// <summary>
+    /// Returns a failure response.
+    /// </summary>
+    /// <param name="payload">Optional payload.</param>
+    /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
+    /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Fail<'T>(
         payload: 'T,

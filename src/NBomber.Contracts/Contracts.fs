@@ -17,11 +17,17 @@ type IResponse =
     abstract SizeBytes: int64    
     abstract Message: string     
 
+/// Represents a generic NBomber response type
 type Response<'T> = {
+    /// Gets StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.
     StatusCode: string
+    /// Boolean flag indicating if the response contains an error. `true` if the response is an error; `false` if the response is successful.
     IsError: bool
+    /// Size of the response in bytes. Helpful in tracking response size for performance analysis.
     SizeBytes: int64    
+    /// Message associated with the response, often used to provide a human-readable description of the response or error details if `IsError` is true.
     Message: string
+    /// Optional payload. It will contain `Some(value)` if there is a payload, or `None` if absent.
     Payload: 'T option
 }
 with
@@ -37,17 +43,22 @@ type ScenarioOperation =
     | WarmUp = 2
     | Bombing = 3
 
+/// Represents information about a scenario instance, including unique identifiers, operation details, etc.
 type ScenarioInfo = {
     /// Gets the current scenario thread id.
     /// You can use it as correlation id.
     [<Obsolete("Please use InstanceId instead")>] ThreadId: string
     [<Obsolete("Please use InstanceNumber instead")>] ThreadNumber: int
     
-    InstanceId: string
-    InstanceNumber: int
-    ScenarioName: string
+    /// Unique identifier for the scenario instance. This can be used as a correlation ID to distinguish between different instances.
+    InstanceId: string    
+    /// A unique, sequential number for each scenario instance. Serves as a simple integer identifier for instances of the scenario.
+    InstanceNumber: int    
+    /// The name of the scenario.
+    ScenarioName: string    
+    /// The planned duration of the scenario.
     ScenarioDuration: TimeSpan
-    /// Returns info about current operation type.
+    /// Provides information about the type of the current operation within the scenario.
     /// It can be: WarmUp or Bombing.
     ScenarioOperation: ScenarioOperation
 }
@@ -126,19 +137,24 @@ type IScenarioContext =
     /// Stops all scenarios. In the cluster mode, NBomber will stop all scenarios on all nodes.
     abstract StopCurrentTest: reason:string -> unit
 
-/// Represents scenario partition.
+/// Represents a partition of a scenario in a distributed or clustered environment.
 /// In the cluster mode, the Coordinator automatically assigns ScenarioPartition to each Agent that runs the same Scenario.
 type ScenarioPartition = {    
     /// Gets scenario partition number in the cluster.    
+    /// Each partition has a unique number that identifies its place in the cluster. 
     Number: int
     
-    /// Gets scenario partitions count in the cluster.
+    /// The total number of partitions for the Scenario within the cluster.
+    /// Defines the total count of partitions, which allows each Agent to determine
+    /// its scope and workload in relation to other partitions.
     Count: int
 }
 with
     [<CompiledName("Empty")>]
     static member empty = { Number = 1; Count = 1 }
 
+/// Defines the context for initializing a scenario.
+/// Provides access to configuration, logging, and metadata required for setting up and running a scenario.
 type IScenarioInitContext =
     /// Gets current test info
     abstract TestInfo: TestInfo
@@ -280,10 +296,15 @@ type Threshold private (stepName: string,
                         abortWhenErrorCount: Nullable<int>,
                         startCheckAfter: Nullable<TimeSpan>) =
     
-    member this.StepName = stepName
+    /// Gets StepName for the current Scenario's threshold.
+    member this.StepName = stepName    
+    /// Gets Step's check function. This function is executed periodically to monitor and check metrics.
     member this.CheckStep = checkStep
-    member this.CheckScenario = checkScenario    
+    /// Gets Scenario's check function. This function is executed periodically to monitor and check metrics.
+    member this.CheckScenario = checkScenario
+    /// Gets error threshold count. Once this limit is reached, NBomber will terminate the session earlier. The default value is null, meaning NBomber will not end the session early, even if the failed thresholds are met.
     member this.AbortWhenErrorCount = abortWhenErrorCount
+    /// Gets the start time (delay) after which NBomber will begin executing the threshold check function.
     member this.StartCheckAfter = startCheckAfter    
     
     /// <summary>
@@ -331,13 +352,16 @@ type ScenarioProps = {
 
 /// Provides details about the Scenario that is scheduled to start.
 type ScenarioStartInfo = {
+    /// Gets Scenario name.
     ScenarioName: string
+    /// Gets Scenario's sorting index. It can be used to order Scenario on UI. 
     SortIndex: int
 }
 
 /// Provides session details about the Scenarios that are scheduled to start.
 type SessionStartInfo = {
-    Scenarios: ScenarioStartInfo[]   
+    /// Gets list of Scenarios that are scheduled to start
+    Scenarios: ScenarioStartInfo[]
 }
 
 /// ReportingSink provides functionality for saving real-time and final statistics.
@@ -413,6 +437,7 @@ type ApplicationType =
     | Process = 0
     | Console = 1
 
+/// Provides extension methods for searching and retrieving statistics data
 type StatsExtensions() =    
     
     static let rec findStatus (stats: StatusCodeStats[]) (code: string) (index: int) =
@@ -439,49 +464,67 @@ type StatsExtensions() =
         else
             findStep stats name (index + 1)            
     
+    /// Retrieves the `StatusCodeStats` with the specified status code.
+    /// Throws a `KeyNotFoundException` if the status code is not found.
     [<Extension>]
     static member Get(statusCodes: StatusCodeStats[], statusCode: string) =
         match findStatus statusCodes statusCode 0 with
         | ValueSome v -> v
         | ValueNone   -> raise (KeyNotFoundException $"Status code: '{statusCode}' is not found.") 
         
+    /// Finds the `StatusCodeStats` with the specified status code.
+    /// Returns the matched `StatusCodeStats` if found, otherwise `null`.        
     [<Extension>]
     static member Find(statusCodes: StatusCodeStats[], statusCode: string) =
         findStatus statusCodes statusCode 0
         |> ValueOption.defaultValue(Unchecked.defaultof<_>)        
 
+    /// Checks if a `StatusCodeStats` with the specified status code exists.
+    /// Returns `true` if found, otherwise `false`.
     [<Extension>]
     static member Exists(statusCodes: StatusCodeStats[], statusCode: string) =
         findStatus statusCodes statusCode 0
         |> ValueOption.isSome
             
+    /// Retrieves the `ScenarioStats` with the specified scenario name.
+    /// Throws a `KeyNotFoundException` if the scenario name is not found.            
     [<Extension>]
     static member Get(scenarioStats: ScenarioStats[], name: string) =
         match findScenario scenarioStats name 0 with        
         | ValueSome v -> v
         | ValueNone   -> raise (KeyNotFoundException $"Scenario: '{name}' is not found.")                
-            
+          
+    /// Finds the `ScenarioStats` with the specified scenario name.
+    /// Returns the matched `ScenarioStats` if found, otherwise `null`.            
     [<Extension>]
     static member Find(scenarioStats: ScenarioStats[], name: string) =
         findScenario scenarioStats name 0
         |> ValueOption.defaultValue(Unchecked.defaultof<_>)
         
+    /// Checks if a `ScenarioStats` with the specified scenario name exists.
+    /// Returns `true` if found, otherwise `false`.        
     [<Extension>]
     static member Exists(scenarioStats: ScenarioStats[], name: string) =
         findScenario scenarioStats name 0
         |> ValueOption.isSome
         
+    /// Retrieves the `StepStats` with the specified step name.
+    /// Throws a `KeyNotFoundException` if the step name is not found.        
     [<Extension>]
     static member Get(stepStats: StepStats[], name: string) =        
         match findStep stepStats name 0 with        
         | ValueSome v -> v
         | ValueNone   -> raise (KeyNotFoundException $"Step: '{name}' is not found.")         
-            
+
+    /// Finds the `StepStats` with the specified step name.
+    /// Returns the matched `StepStats` if found, otherwise `null`.            
     [<Extension>]
     static member Find(stepStats: StepStats[], name: string) =
         findStep stepStats name 0
         |> ValueOption.defaultValue(Unchecked.defaultof<_>)        
         
+    /// Checks if a `StepStats` with the specified step name exists.
+    /// Returns `true` if found, otherwise `false`.
     [<Extension>]
     static member Exists(stepStats: StepStats[], name: string) =
         findStep stepStats name 0
