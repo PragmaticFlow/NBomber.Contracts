@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <Authors>Anton Moldovan</Authors>
         <Company>NBomber</Company>
-        <Version>5.6.1</Version>
+        <Version>5.6.2-beta.0</Version>
         <Copyright>NBomber@2024</Copyright>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -33,7 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>        
-        <PackageReference Include="FSharp.Json.New" Version="0.4.2" />        
+        <PackageReference Include="FSharp.Json.New" Version="0.5.0" />        
         <PackageReference Include="FSharp.UMX" Version="1.1.0" />
         <PackageReference Include="MessagePack" Version="2.5.192" />
         <PackageReference Include="MessagePack.FSharpExtensions" Version="4.0.0" />
