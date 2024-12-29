@@ -3,6 +3,11 @@
 open System
 open MessagePack
 
+/// MetricType represents various metrics, each providing its usefulness depending on the tracked measurement.
+type MetricType =    
+    /// A Gauge represents a measure of a value where the value arbitrarily increases or decreases, for example, CPU usage, RAM usage.
+    | Gauge = 1
+
 [<MessagePackObject>]
 type internal MetricPercentiles = {
     [<Key 0>] Mean: float
@@ -12,11 +17,6 @@ type internal MetricPercentiles = {
     [<Key 4>] Percent95: float
     [<Key 5>] Percent99: float    
 }
-
-/// MetricType represents various metrics, each providing its usefulness depending on the tracked measurement.
-type MetricType =    
-    /// A Gauge represents a measure of a value where the value arbitrarily increases or decreases, for example, CPU usage, RAM usage.
-    | Gauge = 1
 
 type internal MetricHistoryValue = {    
     [<Key 0>] Value: float
