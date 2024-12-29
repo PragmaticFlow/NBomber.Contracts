@@ -4,11 +4,9 @@
 
 open System
 open System.Data
-
 open FSharp.Json
 open MessagePack
-
-open NBomber.Contracts.Internal.Serialization.JsonTransforms
+open NBomber.Contracts.Serialization.JsonTransforms
 
 type ReportFormat =
     | Txt = 0
@@ -16,7 +14,6 @@ type ReportFormat =
     | Csv = 2
     | Md = 3
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type TestInfo = {
     [<Key 0>] SessionId: string
@@ -43,7 +40,6 @@ type OperationType =
     | Complete = 5
     | Error = 6
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type NodeInfo = {
     [<Key 0>] MachineName: string
@@ -62,7 +58,6 @@ with
         OS = ""; DotNetVersion = ""; Processor = ""; CoresCount = 0; NBomberVersion = ""
     }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type StatusCodeStats = {
     [<Key 0>] StatusCode: string
@@ -72,7 +67,6 @@ type StatusCodeStats = {
     [<Key 4>] mutable Percent: int
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type RequestStats = {
     [<Key 0>] Count: int
@@ -80,7 +74,6 @@ type RequestStats = {
     [<Key 2>] mutable Percent: int
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type LatencyCount = {
     [<Key 0>] LessOrEq800: int
@@ -88,7 +81,6 @@ type LatencyCount = {
     [<Key 2>] MoreOrEq1200: int
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type LatencyStats = {
     [<Key 0>] MinMs: float
@@ -102,7 +94,6 @@ type LatencyStats = {
     [<Key 8>] LatencyCount: LatencyCount
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type DataTransferStats = {
     [<Key 0>] MinBytes: int64
@@ -116,7 +107,6 @@ type DataTransferStats = {
     [<Key 8>] AllBytes: int64
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type MeasurementStats = {
     [<Key 0>] Request: RequestStats
@@ -125,7 +115,6 @@ type MeasurementStats = {
     [<Key 3>] StatusCodes: StatusCodeStats[]
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type StepStats = {
     [<Key 0>] StepName: string
@@ -134,14 +123,12 @@ type StepStats = {
     [<Key 3>] SortIndex: int
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type LoadSimulationStats = {
     [<Key 0>] SimulationName: string
     [<Key 1>] Value: int
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type ScenarioStats = {    
     [<Key 0>] ScenarioName: string     
@@ -192,7 +179,6 @@ type ThresholdResult = {
     IsFailed: bool
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
 type NodeStats = {
     [<Key 0>] ScenarioStats: ScenarioStats[]
@@ -237,7 +223,6 @@ with
         |> Array.tryFind(fun x -> x.ScenarioName = scenarioName)
         |> Option.defaultValue(Unchecked.defaultof<_>)        
     
-[<CLIMutable>]        
 type ReportData = {
     ScenarioStats: ScenarioStats[]
 }

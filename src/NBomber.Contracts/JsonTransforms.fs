@@ -1,4 +1,4 @@
-﻿namespace NBomber.Contracts.Internal.Serialization.JsonTransforms
+﻿module internal NBomber.Contracts.Serialization.JsonTransforms
 
 open System.Data
 open FSharp.Json

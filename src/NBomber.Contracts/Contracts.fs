@@ -10,6 +10,7 @@ open System.Threading.Tasks
 open Serilog
 open Microsoft.Extensions.Configuration
 open NBomber.Contracts.Stats
+open NBomber.Contracts.Metric
 
 type IResponse =
     abstract StatusCode: string

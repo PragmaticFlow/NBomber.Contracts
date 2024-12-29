@@ -1,11 +1,10 @@
-﻿namespace NBomber.Contracts.Stats
+﻿namespace NBomber.Contracts.Metric
 
 open System
 open MessagePack
 
-[<CLIMutable>]
 [<MessagePackObject>]
-type MetricPercentiles = {
+type internal MetricPercentiles = {
     [<Key 0>] Mean: float
     [<Key 1>] Max: float
     [<Key 2>] Percent50: float
@@ -19,14 +18,13 @@ type MetricType =
     /// A Gauge represents a measure of a value where the value arbitrarily increases or decreases, for example, CPU usage, RAM usage.
     | Gauge = 1
 
-type MetricHistoryValue = {    
+type internal MetricHistoryValue = {    
     [<Key 0>] Value: float
     [<Key 1>] Timestamp: TimeSpan
 }
 
-[<CLIMutable>]
 [<MessagePackObject>]
-type MetricStats = {
+type internal MetricStats = {
     [<Key 0>] Name: string
     [<Key 1>] MeasureUnit: string
     [<Key 2>] MetricType: MetricType
