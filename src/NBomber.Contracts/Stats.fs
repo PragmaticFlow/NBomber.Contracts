@@ -14,7 +14,7 @@ type ReportFormat =
     | Csv = 2
     | Md = 3
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type TestInfo = {
     [<Key 0>] SessionId: string
     [<Key 1>] TestSuite: string
@@ -40,7 +40,7 @@ type OperationType =
     | Complete = 5
     | Error = 6
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type NodeInfo = {
     [<Key 0>] MachineName: string
     [<Key 1>] NodeType: NodeType
@@ -58,7 +58,7 @@ with
         OS = ""; DotNetVersion = ""; Processor = ""; CoresCount = 0; NBomberVersion = ""
     }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type StatusCodeStats = {
     [<Key 0>] StatusCode: string
     [<Key 1>] IsError: bool
@@ -67,21 +67,21 @@ type StatusCodeStats = {
     [<Key 4>] mutable Percent: int
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type RequestStats = {
     [<Key 0>] Count: int
     [<Key 1>] RPS: float
     [<Key 2>] mutable Percent: int
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type LatencyCount = {
     [<Key 0>] LessOrEq800: int
     [<Key 1>] More800Less1200: int
     [<Key 2>] MoreOrEq1200: int
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type LatencyStats = {
     [<Key 0>] MinMs: float
     [<Key 1>] MeanMs: float
@@ -94,7 +94,7 @@ type LatencyStats = {
     [<Key 8>] LatencyCount: LatencyCount
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type DataTransferStats = {
     [<Key 0>] MinBytes: int64
     [<Key 1>] MeanBytes: int64
@@ -107,7 +107,7 @@ type DataTransferStats = {
     [<Key 8>] AllBytes: int64
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type MeasurementStats = {
     [<Key 0>] Request: RequestStats
     [<Key 1>] Latency: LatencyStats
@@ -115,7 +115,7 @@ type MeasurementStats = {
     [<Key 3>] StatusCodes: StatusCodeStats[]
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type StepStats = {
     [<Key 0>] StepName: string
     [<Key 1>] Ok: MeasurementStats
@@ -123,13 +123,13 @@ type StepStats = {
     [<Key 3>] SortIndex: int
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type LoadSimulationStats = {
     [<Key 0>] SimulationName: string
     [<Key 1>] Value: int
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type ScenarioStats = {    
     [<Key 0>] ScenarioName: string     
     [<Key 1>] Ok: MeasurementStats
@@ -179,7 +179,7 @@ type ThresholdResult = {
     IsFailed: bool
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type NodeStats = {
     [<Key 0>] ScenarioStats: ScenarioStats[]
     [<IgnoreMember>] Thresholds: ThresholdResult[]
