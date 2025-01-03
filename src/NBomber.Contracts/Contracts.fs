@@ -139,7 +139,7 @@ type IScenarioContext =
     abstract StopCurrentTest: reason:string -> unit
     
     /// Returns the current execution time of the scenario.  
-    abstract GetScenarioTime: unit -> TimeSpan
+    abstract GetScenarioTimerTime: unit -> TimeSpan
 
 /// Represents a partition of a scenario in a distributed or clustered environment.
 /// In the cluster mode, the Coordinator automatically assigns ScenarioPartition to each Agent that runs the same Scenario.
