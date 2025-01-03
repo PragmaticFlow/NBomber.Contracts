@@ -12,20 +12,29 @@ open Microsoft.Extensions.Configuration
 open NBomber.Contracts.Stats
 open NBomber.Contracts.Metric
 
+/// Represents a generic NBomber response interface.
 type IResponse =
+    /// Gets StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.
     abstract StatusCode: string
+    /// Boolean flag indicating if the response contains an error. `true` if the response is an error; `false` if the response is successful.
     abstract IsError: bool
-    abstract SizeBytes: int64    
+    /// Size of the response in bytes. Helpful in tracking response size for performance analysis.
+    abstract SizeBytes: int64
+    /// Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.
+    abstract CustomLatencyMs: float
+    /// Message associated with the response, often used to provide a human-readable description of the response or error details if `IsError` is true.
     abstract Message: string     
 
-/// Represents a generic NBomber response type
+/// Represents a generic NBomber response type.
 type Response<'T> = {
     /// Gets StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.
     StatusCode: string
     /// Boolean flag indicating if the response contains an error. `true` if the response is an error; `false` if the response is successful.
     IsError: bool
     /// Size of the response in bytes. Helpful in tracking response size for performance analysis.
-    SizeBytes: int64    
+    SizeBytes: int64
+    /// Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.  
+    CustomLatencyMs: float
     /// Message associated with the response, often used to provide a human-readable description of the response or error details if `IsError` is true.
     Message: string
     /// Optional payload. It will contain `Some(value)` if there is a payload, or `None` if absent.
@@ -35,7 +44,8 @@ with
     interface IResponse with        
         member this.StatusCode = this.StatusCode
         member this.IsError = this.IsError
-        member this.SizeBytes = this.SizeBytes        
+        member this.SizeBytes = this.SizeBytes
+        member this.CustomLatencyMs = this.CustomLatencyMs
         member this.Message = this.Message
         
 type ScenarioOperation =
@@ -138,7 +148,7 @@ type IScenarioContext =
     /// Stops all scenarios. In the cluster mode, NBomber will stop all scenarios on all nodes.
     abstract StopCurrentTest: reason:string -> unit
     
-    /// Returns the current execution time of the scenario.  
+    /// Returns the current execution time of the Scenario timer.  
     abstract GetScenarioTimerTime: unit -> TimeSpan
 
 /// Represents a partition of a scenario in a distributed or clustered environment.

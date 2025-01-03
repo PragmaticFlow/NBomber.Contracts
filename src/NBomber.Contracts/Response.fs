@@ -14,16 +14,16 @@ module internal ResponseInternal =
     let OperationTimeoutMessage = "operation timeout"
 
     let okEmpty : Response<obj> =
-        { StatusCode = ""; IsError = false; SizeBytes = 0; Message = ""; Payload = None }
+        { StatusCode = ""; IsError = false; SizeBytes = 0; Message = ""; Payload = None; CustomLatencyMs = 0 }
 
     let failEmpty<'T> : Response<'T> =
-        { StatusCode = ""; IsError = true; SizeBytes = 0; Message = ""; Payload = None }
+        { StatusCode = ""; IsError = true; SizeBytes = 0; Message = ""; Payload = None; CustomLatencyMs = 0 }
 
     let failUnhandled<'T> (ex: Exception) : Response<'T> =
-        { StatusCode = UnhandledExceptionCode; IsError = true; SizeBytes = 0; Message = ex.Message; Payload = None }
+        { StatusCode = UnhandledExceptionCode; IsError = true; SizeBytes = 0; Message = ex.Message; Payload = None; CustomLatencyMs = 0 }
 
     let failTimeout<'T> : Response<'T> =
-        { StatusCode = TimeoutStatusCode; IsError = true; SizeBytes = 0; Message = OperationTimeoutMessage; Payload = None }
+        { StatusCode = TimeoutStatusCode; IsError = true; SizeBytes = 0; Message = OperationTimeoutMessage; Payload = None; CustomLatencyMs = 0 }
 
 type Response =
 
@@ -42,15 +42,18 @@ type Response =
     /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
     /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
     /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
+    /// <param name="customLatencyMs">Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.</param>
     static member inline ok<'T>(
         ?payload: 'T,
         ?statusCode: string,
         ?sizeBytes: int64,
-        ?message: string) =
+        ?message: string,
+        ?customLatencyMs: float) =
 
         { StatusCode = statusCode |> Option.defaultValue ""
           IsError = false
           SizeBytes = sizeBytes |> Option.defaultValue 0
+          CustomLatencyMs = customLatencyMs |> Option.defaultValue 0
           Message = message |> Option.defaultValue ""
           Payload = payload }
 
@@ -61,15 +64,18 @@ type Response =
     /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
     /// <param name="payload">Optional payload.</param>
     /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
+    /// <param name="customLatencyMs">Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.</param>
     static member inline fail<'T>(
         ?statusCode: string,
         ?message: string,
         ?payload: 'T,
-        ?sizeBytes: int64) =
+        ?sizeBytes: int64,
+        ?customLatencyMs: float) =
 
         { StatusCode = statusCode |> Option.defaultValue ""
           IsError = true
           SizeBytes = sizeBytes |> Option.defaultValue 0
+          CustomLatencyMs = customLatencyMs |> Option.defaultValue 0
           Message = message |> Option.defaultValue ""
           Payload = payload }
         
@@ -96,16 +102,19 @@ type Response =
     /// </summary>
     /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
     /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
-    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>    
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
+    /// <param name="customLatencyMs">Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.</param> 
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Ok(
         [<Optional;DefaultParameterValue("")>] statusCode: string,
         [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64,
-        [<Optional;DefaultParameterValue("")>] message: string) : Response<obj> =
+        [<Optional;DefaultParameterValue("")>] message: string,
+        [<Optional;DefaultParameterValue(0.0)>] customLatencyMs: float) : Response<obj> =
 
         { StatusCode = statusCode
           IsError = false
           SizeBytes = sizeBytes
+          CustomLatencyMs = 0
           Message = if isNull message then String.Empty else message
           Payload = None }
 
@@ -115,15 +124,18 @@ type Response =
     /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
     /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
     /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
+    /// <param name="customLatencyMs">Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.</param>
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Ok<'T>(
         [<Optional;DefaultParameterValue("")>] statusCode: string,
         [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64,
-        [<Optional;DefaultParameterValue("")>] message: string) : Response<'T> =
+        [<Optional;DefaultParameterValue("")>] message: string,
+        [<Optional;DefaultParameterValue(0.0)>] customLatencyMs: float) : Response<'T> =
 
         { StatusCode = statusCode
           IsError = false
           SizeBytes = sizeBytes
+          CustomLatencyMs = customLatencyMs
           Message = if isNull message then String.Empty else message
           Payload = None }
 
@@ -133,17 +145,20 @@ type Response =
     /// <param name="payload">Optional payload.</param>
     /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
     /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
-    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>    
+    /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
+    /// <param name="customLatencyMs">Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.</param> 
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Ok<'T>(
         payload: 'T,
         [<Optional;DefaultParameterValue("")>] statusCode: string,
         [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64,
-        [<Optional;DefaultParameterValue("")>] message: string) : Response<'T> =
+        [<Optional;DefaultParameterValue("")>] message: string,
+        [<Optional;DefaultParameterValue(0.0)>] customLatencyMs: float) : Response<'T> =
 
         { StatusCode = statusCode
           IsError = false
           SizeBytes = sizeBytes
+          CustomLatencyMs = customLatencyMs
           Message = if isNull message then String.Empty else message
           Payload = Some payload }
 
@@ -153,15 +168,18 @@ type Response =
     /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>    
     /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
     /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
+    /// <param name="customLatencyMs">Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.</param>
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Fail(
         [<Optional;DefaultParameterValue("")>] statusCode: string,
         [<Optional;DefaultParameterValue("")>] message: string,
-        [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64) : Response<obj> =
+        [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64,
+        [<Optional;DefaultParameterValue(0.0)>] customLatencyMs: float) : Response<obj> =
 
         { StatusCode = statusCode
           IsError = true
           SizeBytes = sizeBytes
+          CustomLatencyMs = customLatencyMs
           Message = if isNull message then String.Empty else message
           Payload = None }
 
@@ -171,15 +189,18 @@ type Response =
     /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
     /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
     /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
+    /// <param name="customLatencyMs">Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.</param>
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Fail<'T>(
         [<Optional;DefaultParameterValue("")>] statusCode: string,
         [<Optional;DefaultParameterValue("")>] message: string,
-        [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64) : Response<'T> =
+        [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64,
+        [<Optional;DefaultParameterValue(0.0)>] customLatencyMs: float) : Response<'T> =
 
         { StatusCode = statusCode
           IsError = true
           SizeBytes = sizeBytes
+          CustomLatencyMs = customLatencyMs
           Message = if isNull message then String.Empty else message
           Payload = None }
 
@@ -190,15 +211,18 @@ type Response =
     /// <param name="statusCode">StatusCode, which typically represents the HTTP status code (e.g., "200", "404") or any application-specific status indicator.</param>
     /// <param name="message">Optional message associated with the response, often used to provide a human-readable description of the response or error details.</param>
     /// <param name="sizeBytes">Size of the response in bytes. Helpful in tracking response size for performance analysis.</param>
+    /// <param name="customLatencyMs">Specifies a custom latency to override the original response latency. This is useful in scenarios where the operation's latency needs to be measured in a custom manner.</param>
     [<MethodImpl(MethodImplOptions.AggressiveInlining)>]
     static member Fail<'T>(
         payload: 'T,
         [<Optional;DefaultParameterValue("")>] statusCode: string,
         [<Optional;DefaultParameterValue("")>] message: string,
-        [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64) : Response<'T> =
+        [<Optional;DefaultParameterValue(0L)>] sizeBytes: int64,
+        [<Optional;DefaultParameterValue(0.0)>] customLatencyMs: float) : Response<'T> =
 
         { StatusCode = statusCode
           IsError = true
           SizeBytes = sizeBytes
+          CustomLatencyMs = customLatencyMs
           Message = if isNull message then String.Empty else message
           Payload = Some payload }        
