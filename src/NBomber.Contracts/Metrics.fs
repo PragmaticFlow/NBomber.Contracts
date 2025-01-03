@@ -8,7 +8,7 @@ type MetricType =
     /// A Gauge represents a measure of a value where the value arbitrarily increases or decreases, for example, CPU usage, RAM usage.
     | Gauge = 1
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type internal MetricPercentiles = {
     [<Key 0>] Mean: float
     [<Key 1>] Max: float
@@ -23,7 +23,7 @@ type internal MetricHistoryValue = {
     [<Key 1>] Timestamp: TimeSpan
 }
 
-[<MessagePackObject>]
+[<CLIMutable; MessagePackObject>]
 type internal MetricStats = {
     [<Key 0>] Name: string
     [<Key 1>] MeasureUnit: string

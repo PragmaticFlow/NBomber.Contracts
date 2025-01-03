@@ -137,6 +137,9 @@ type IScenarioContext =
     
     /// Stops all scenarios. In the cluster mode, NBomber will stop all scenarios on all nodes.
     abstract StopCurrentTest: reason:string -> unit
+    
+    /// Returns the current execution time of the scenario.  
+    abstract GetScenarioTime: unit -> TimeSpan
 
 /// Represents a partition of a scenario in a distributed or clustered environment.
 /// In the cluster mode, the Coordinator automatically assigns ScenarioPartition to each Agent that runs the same Scenario.
