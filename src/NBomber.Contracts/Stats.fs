@@ -1,7 +1,6 @@
 ﻿namespace NBomber.Contracts.Stats
 
 #nowarn "0044"
-
 open System
 open System.Data
 open FSharp.Json

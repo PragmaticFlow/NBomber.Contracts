@@ -10,7 +10,7 @@ open System.Threading.Tasks
 open Serilog
 open Microsoft.Extensions.Configuration
 open NBomber.Contracts.Stats
-open NBomber.Contracts.Metric
+open NBomber.Contracts.Metrics
 
 /// Represents a generic NBomber response interface.
 type IResponse =
@@ -191,6 +191,9 @@ type IScenarioInitContext =
     
     /// NBomber's logger
     abstract Logger: ILogger
+    
+    abstract RegisterMetric: counter:ICounter -> unit
+    abstract RegisterMetric: gauge:IGauge -> unit
 
 /// LoadSimulation allows configuring parallelism and workload profiles.
 /// Link for info: https://nbomber.com/docs/nbomber/load-simulation 
