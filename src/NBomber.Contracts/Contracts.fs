@@ -74,80 +74,45 @@ type ScenarioInfo = {
     ScenarioOperation: ScenarioOperation
 }
 
-/// MetricsProvider provides functionality for publishing custom metrics that will be aggregated.
-/// It can be used for cases related to grabbing performance counters or other time series data.
-/// It supports standard metric types: Histogram, Gauge.
-type IMetricsProvider =
-    
-    /// <summary>
-    /// Registers metric.
-    /// The metric should be registered first before any usage. 
-    /// </summary>
-    /// <param name="metricName">Unique metric name.</param>
-    /// <param name="measureUnit">Measure unit.</param>
-    /// <param name="scalingFraction">Scaling fraction. Under the hood, the metric values are stored as int64.
-    /// In order to be able to express a metric value as double, the multiplication by scaling factor is used.</param>
-    /// <param name="metricType">Metric type.</param>
-    /// <example>
-    /// <code>
-    ///  metricsProvider.RegisterMetric("thread-count", "MB", 1, MetricType.Gauge)    
-    /// </code>
-    /// </example>
-    abstract RegisterMetric: metricName:string * measureUnit:string * scalingFraction:float * metricType:MetricType -> unit
-    
-    /// <summary>
-    /// Publishes metric.
-    /// </summary>
-    /// <param name="metricName">Unique metric name. The metric name should be registered before publishing.</param>
-    /// <param name="value">Metric value.</param>
-    abstract PublishMetric: metricName:string * value:float -> unit
-
 type IBaseContext =
     /// Gets current test info. 
     abstract TestInfo: TestInfo
     /// Gets current node info.
-    abstract GetNodeInfo: unit -> NodeInfo    
+    abstract GetNodeInfo: unit -> NodeInfo
     /// NBomber's logger.
     abstract Logger: ILogger
-    /// Instance of metric provider. It should be used to record metrics.
-    abstract MetricsProvider: IMetricsProvider
+    /// Registers a counter metric.
+    abstract RegisterMetric: counter:ICounter -> unit
+    /// Registers a gauge metric.
+    abstract RegisterMetric: gauge:IGauge -> unit
 
 /// ScenarioContext represents the execution context of the currently running Scenario.
 /// It provides functionality to log particular events, get information about the test, thread id, scenario copy/instance number, etc.
 /// Also, it provides the option to stop all or particular scenarios manually.
 type IScenarioContext =
     abstract TestInfo: TestInfo
-    abstract ScenarioInfo: ScenarioInfo
-    
+    abstract ScenarioInfo: ScenarioInfo    
     /// Returns information about the current node, node role, etc.
     /// For example, you can use it to get node roles: Coordinator, Agent, or SingleNode.
     abstract NodeInfo: NodeInfo
-    abstract Logger: ILogger
-    
+    abstract Logger: ILogger    
     /// Represent the current Scenario instance invocation number. It starts from 1.
-    abstract InvocationNumber: int64
-    
+    abstract InvocationNumber: int64    
     /// A dictionary that stores Scenario instance data and cleans it after Scenario iteration.
     /// It can be used to share some data between steps.
-    abstract Data: Dictionary<string,obj>
-    
+    abstract Data: Dictionary<string,obj>    
     /// A dictionary that stores Scenario instance data and keep it for the whole scenario duration.
     /// It can be used to model Virtual User data that bound to Scenario instance. 
-    abstract ScenarioInstanceData: Dictionary<string,obj>
-    
+    abstract ScenarioInstanceData: Dictionary<string,obj>    
     /// Indicates that scenario execution is finished or canceled.
     /// You can listen to changes via ScenarioCancellationToken.IsCancellationRequested.
     abstract ScenarioCancellationToken: CancellationToken
-
     /// Represent the basic .NET Random that should be used to introduce dynamic behavior. 
-    abstract Random: Random
-    
+    abstract Random: Random    
     /// Stops the specified scenario. In the cluster mode, NBomber will stop the specified scenario on all nodes.
-    abstract StopScenario: scenarioName:string * reason:string -> unit
-    
+    abstract StopScenario: scenarioName:string * reason:string -> unit    
     /// Stops all scenarios. In the cluster mode, NBomber will stop all scenarios on all nodes.
-    abstract StopCurrentTest: reason:string -> unit
-    
+    abstract StopCurrentTest: reason:string -> unit    
     /// Returns the current execution time of the Scenario timer.  
     abstract GetScenarioTimerTime: unit -> TimeSpan
 
@@ -171,28 +136,23 @@ with
 /// Provides access to configuration, logging, and metadata required for setting up and running a scenario.
 type IScenarioInitContext =
     /// Gets current test info
-    abstract TestInfo: TestInfo
-    
+    abstract TestInfo: TestInfo    
     /// Gets current Scenario info
-    abstract ScenarioInfo: ScenarioInfo
-    
+    abstract ScenarioInfo: ScenarioInfo    
     /// Gets current node info
-    abstract NodeInfo: NodeInfo
-    
+    abstract NodeInfo: NodeInfo    
     /// Gets Scenario's custom settings from the configuration file
-    abstract CustomSettings: IConfiguration
-    
+    abstract CustomSettings: IConfiguration    
     /// Gets Global custom settings from the configuration file
-    abstract GlobalCustomSettings: IConfiguration
-    
+    abstract GlobalCustomSettings: IConfiguration    
     /// Gets scenario partition in the cluster.
     /// In the cluster mode, the Coordinator automatically assigns ScenarioPartition to each Agent that runs the same Scenario. 
-    abstract ScenarioPartition: ScenarioPartition    
-    
+    abstract ScenarioPartition: ScenarioPartition
     /// NBomber's logger
-    abstract Logger: ILogger
-    
+    abstract Logger: ILogger    
+    /// Registers a counter metric.
     abstract RegisterMetric: counter:ICounter -> unit
+    /// Registers a gauge metric.
     abstract RegisterMetric: gauge:IGauge -> unit
 
 /// LoadSimulation allows configuring parallelism and workload profiles.
@@ -337,7 +297,7 @@ type Threshold private (stepName: string,
                           [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckAfter: Nullable<TimeSpan>) =
         
         Threshold("", Unchecked.defaultof<_>, checkScenario, abortWhenErrorCount, startCheckAfter)
-         
+
     /// <summary>
     /// Creates a runtime threshold.
     /// Thresholds are the pass/fail criteria that you define for your test metrics.
@@ -450,6 +410,29 @@ type IWorkerPlugin =
     /// </summary>
     abstract Stop: unit -> Task
 
+/// Provides methods for creating metric instances.
+type Metric =
+    
+    /// <summary>
+    /// Creates a new counter metric.
+    /// </summary>
+    /// <param name="metricName">The name of the counter metric.</param>
+    /// <param name="unitOfMeasure">The unit of measure for the counter.</param>
+    /// <returns>An instance of <see cref="ICounter"/>.</returns>
+    [<CompiledName("CreateCounter")>]
+    static member createCounter(metricName, unitOfMeasure) =
+        Counter(metricName, unitOfMeasure) :> ICounter
+        
+    /// <summary>
+    /// Creates a new gauge metric.
+    /// </summary>
+    /// <param name="metricName">The name of the gauge metric.</param>
+    /// <param name="unitOfMeasure">The unit of measure for the gauge.</param>
+    /// <returns>An instance of <see cref="IGauge"/>.</returns>            
+    [<CompiledName("CreateGauge")>]        
+    static member createGauge(metricName, unitOfMeasure) =
+        Gauge(metricName, unitOfMeasure) :> IGauge
+
 type ApplicationType =
     | Process = 0
     | Console = 1
@@ -480,6 +463,22 @@ type StatsExtensions() =
             ValueSome stats[index]        
         else
             findStep stats name (index + 1)            
+    
+    static let rec findCounterMetric (counters: CounterStats[]) (metricName: string) (index: int) =
+        if index >= counters.Length then
+            ValueNone
+        elif counters[index].MetricName = metricName then
+            ValueSome counters[index]        
+        else
+            findCounterMetric counters metricName (index + 1)
+    
+    static let rec findGaugeMetric (gauges: GaugeStats[]) (metricName: string) (index: int) =
+        if index >= gauges.Length then
+            ValueNone
+        elif gauges[index].MetricName = metricName then
+            ValueSome gauges[index]        
+        else
+            findGaugeMetric gauges metricName (index + 1)
     
     /// Retrieves the `StatusCodeStats` with the specified status code.
     /// Throws a `KeyNotFoundException` if the status code is not found.
@@ -545,4 +544,48 @@ type StatsExtensions() =
     [<Extension>]
     static member Exists(stepStats: StepStats[], name: string) =
         findStep stepStats name 0
-        |> ValueOption.isSome            
+        |> ValueOption.isSome
+        
+    /// Finds the `CounterStats` with the specified metric name.
+    /// Returns the matched `CounterStats` if found, otherwise `null`.        
+    [<Extension>]
+    static member Find(counters: CounterStats[], metricName: string) =
+        findCounterMetric counters metricName 0
+        |> ValueOption.defaultValue(Unchecked.defaultof<_>)
+        
+    /// Retrieves the `CounterStats` with the specified metric name.
+    /// Throws a `KeyNotFoundException` if the metric name is not found.        
+    [<Extension>]
+    static member Get(counters: CounterStats[], metricName: string) =        
+        match findCounterMetric counters metricName 0 with        
+        | ValueSome v -> v
+        | ValueNone   -> raise (KeyNotFoundException $"Counter metric: '{metricName}' is not found.")
+        
+    /// Checks if a `CounterStats` with the specified metric name exists.
+    /// Returns `true` if found, otherwise `false`.        
+    [<Extension>]
+    static member Exists(counters: CounterStats[], metricName: string) =
+        findCounterMetric counters metricName 0
+        |> ValueOption.isSome
+        
+    /// Finds the `GaugeStats` with the specified metric name.
+    /// Returns the matched `GaugeStats` if found, otherwise `null`.          
+    [<Extension>]
+    static member Find(gauges: GaugeStats[], metricName: string) =
+        findGaugeMetric gauges metricName 0
+        |> ValueOption.defaultValue(Unchecked.defaultof<_>)
+        
+    /// Retrieves the `GaugeStats` with the specified metric name.
+    /// Throws a `KeyNotFoundException` if the metric name is not found.        
+    [<Extension>]
+    static member Get(gauges: GaugeStats[], metricName: string) =        
+        match findGaugeMetric gauges metricName 0 with        
+        | ValueSome v -> v
+        | ValueNone   -> raise (KeyNotFoundException $"Gauge metric: '{metricName}' is not found.")
+        
+    /// Checks if a `GaugeStats` with the specified metric name exists.
+    /// Returns `true` if found, otherwise `false`.         
+    [<Extension>]
+    static member Exists(gauges: GaugeStats[], metricName: string) =
+        findGaugeMetric gauges metricName 0
+        |> ValueOption.isSome                                            
