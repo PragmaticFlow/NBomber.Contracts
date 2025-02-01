@@ -1,11 +1,11 @@
 ﻿namespace NBomber.Contracts.Stats
 
 #nowarn "0044"
-
 open System
 open System.Data
 open FSharp.Json
 open MessagePack
+open NBomber.Contracts.Metrics
 open NBomber.Contracts.Serialization.JsonTransforms
 
 type ReportFormat =
@@ -182,16 +182,17 @@ type ThresholdResult = {
 [<CLIMutable; MessagePackObject>]
 type NodeStats = {
     [<Key 0>] ScenarioStats: ScenarioStats[]
+    [<Key 1>] Metrics: MetricStats
     [<IgnoreMember>] Thresholds: ThresholdResult[]
     [<IgnoreMember>] [<JsonField(Transform=typeof<DateTableTransform>)>] PluginStats: DataSet[]
-    [<Key 1>] NodeInfo: NodeInfo
-    [<Key 2>] TestInfo: TestInfo
+    [<Key 2>] NodeInfo: NodeInfo
+    [<Key 3>] TestInfo: TestInfo
     [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 3>] AllRequestCount: int
-    [<Key 4>] AllOkCount: int
-    [<Key 5>] AllFailCount: int
-    [<Key 6>] AllBytes: int64
-    [<Key 7>] Duration: TimeSpan
+    [<Key 4>] AllRequestCount: int
+    [<Key 5>] AllOkCount: int
+    [<Key 6>] AllFailCount: int
+    [<Key 7>] AllBytes: int64
+    [<Key 8>] Duration: TimeSpan
 }
 with
     [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.ScenarioStats.Get(name)")>]
@@ -203,6 +204,7 @@ with
     [<CompiledName("Empty")>]
     static member empty = {        
         ScenarioStats = Array.empty
+        Metrics = MetricStats.empty
         Thresholds = Array.empty
         PluginStats = Array.empty
         NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty; ReportFiles = Array.empty

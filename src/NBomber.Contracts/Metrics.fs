@@ -1,33 +1,79 @@
-﻿namespace NBomber.Contracts.Metric
+﻿namespace NBomber.Contracts.Metrics
 
-open System
-open MessagePack
-
-/// MetricType represents various metrics, each providing its usefulness depending on the tracked measurement.
-type MetricType =    
-    /// A Gauge represents a measure of a value where the value arbitrarily increases or decreases, for example, CPU usage, RAM usage.
-    | Gauge = 1
-
-[<CLIMutable; MessagePackObject>]
-type internal MetricPercentiles = {
-    [<Key 0>] Mean: float
-    [<Key 1>] Max: float
-    [<Key 2>] Percent50: float
-    [<Key 3>] Percent75: float
-    [<Key 4>] Percent95: float
-    [<Key 5>] Percent99: float    
+type GaugeStats = {
+    ScenarioName: string
+    MetricName: string
+    UnitOfMeasure: string
+    Value: float
 }
 
-type internal MetricHistoryValue = {    
-    [<Key 0>] Value: float
-    [<Key 1>] Timestamp: TimeSpan
+type CounterStats = {
+    ScenarioName: string
+    MetricName: string
+    UnitOfMeasure: string
+    Value: int64
 }
 
-[<CLIMutable; MessagePackObject>]
-type internal MetricStats = {
-    [<Key 0>] Name: string
-    [<Key 1>] MeasureUnit: string
-    [<Key 2>] MetricType: MetricType
-    [<Key 3>] History: MetricHistoryValue list
-    [<Key 4>] Percentiles: MetricPercentiles
+type MetricStats = {
+    Counters: CounterStats[]
+    Gauges: GaugeStats[]
 }
+with
+    [<CompiledName("Empty")>]
+    static member empty = {
+        Counters = Array.empty
+        Gauges = Array.empty
+    }
+  
+/// Represents a counter metric that tracks a cumulative value.  
+type ICounter =    
+    /// Gets the name of the metric.    
+    abstract MetricName: string
+    /// Gets the unit of measure associated with the metric.
+    abstract UnitOfMeasure: string
+    /// Adds the value to the counter metric.
+    abstract Add: value:int64 -> unit
+    
+/// Represents a gauge metric that tracks a fluctuating value.    
+type IGauge =
+    /// Gets the name of the metric.
+    abstract MetricName: string
+    /// Gets the unit of measure associated with the metric.
+    abstract UnitOfMeasure: string
+    /// Sets the gauge to the specified value.
+    abstract Set: value:float -> unit    
+    
+type internal Counter(metricName: string, unitOfMeasure: string) =
+    
+    let mutable _publishFn = None // metricName * value
+    
+    let add value =
+        match _publishFn with
+        | Some publish -> publish metricName value
+        | None         -> ()
+    
+    interface ICounter with
+        member this.MetricName = metricName
+        member this.UnitOfMeasure = unitOfMeasure    
+        member this.Add(value) = add value
+    
+    member this.Init(publishFn: string -> int64 -> unit) =
+        _publishFn <- Some publishFn
+        
+type internal Gauge(metricName: string, unitOfMeasure: string) =
+    
+    let mutable _publishFn = None // metricName * value
+    
+    let add value =
+        match _publishFn with
+        | Some publish -> publish metricName value
+        | None         -> ()
+    
+    interface IGauge with
+        member this.MetricName = metricName
+        member this.UnitOfMeasure = unitOfMeasure    
+        member this.Set(value) = add value
+    
+    member this.Init(publishFn: string -> float -> unit) =
+        _publishFn <- Some publishFn        
+    
