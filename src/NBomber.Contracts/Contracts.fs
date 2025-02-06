@@ -3,6 +3,7 @@ namespace NBomber.Contracts
 open System
 open System.Collections.Generic
 open System.Data
+open System.Linq.Expressions
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 open System.Threading
@@ -268,13 +269,13 @@ type LoadSimulation =
 /// The runtime thresholds will be executed periodically to check real-time and final metrics for Scenario and Step.
 /// </summary>
 type Threshold private (stepName: string,
-                        checkStep: Func<StepStats, bool>,
-                        checkScenario: Func<ScenarioStats, bool>,
+                        checkStep: Expression<Func<StepStats, bool>>,
+                        checkScenario: Expression<Func<ScenarioStats, bool>>,
                         abortWhenErrorCount: Nullable<int>,
                         startCheckAfter: Nullable<TimeSpan>) =
     
     /// Gets StepName for the current Scenario's threshold.
-    member this.StepName = stepName    
+    member this.StepName = stepName
     /// Gets Step's check function. This function is executed periodically to monitor and check metrics.
     member this.CheckStep = checkStep
     /// Gets Scenario's check function. This function is executed periodically to monitor and check metrics.
@@ -292,7 +293,7 @@ type Threshold private (stepName: string,
     /// <param name="abortWhenErrorCount">Sets the error threshold count. Once this limit is reached, NBomber will terminate the session earlier. The default value is null, meaning NBomber will not end the session early, even if the failed thresholds are met.</param>
     /// <param name="startCheckAfter">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
     [<CompiledName("Create")>]
-    static member create (checkScenario: Func<ScenarioStats, bool>,
+    static member create (checkScenario: Expression<Func<ScenarioStats, bool>>,
                           [<Optional;DefaultParameterValue(Nullable<int>())>] abortWhenErrorCount: Nullable<int>,
                           [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckAfter: Nullable<TimeSpan>) =
         
@@ -308,7 +309,7 @@ type Threshold private (stepName: string,
     /// <param name="startCheckAfter">Specifies the start time (delay) after which NBomber will begin executing the threshold check function.</param>
     [<CompiledName("Create")>]         
     static member create (stepName: string,
-                          checkStep: Func<StepStats, bool>,
+                          checkStep: Expression<Func<StepStats, bool>>,
                           [<Optional;DefaultParameterValue(Nullable<int>())>] abortWhenErrorCount: Nullable<int>,
                           [<Optional;DefaultParameterValue(Nullable<TimeSpan>())>] startCheckAfter: Nullable<TimeSpan>) =
         
