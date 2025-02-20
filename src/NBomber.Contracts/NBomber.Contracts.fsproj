@@ -20,7 +20,6 @@
 
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
-        <Compile Include="JsonTransforms.fs" />
         <Compile Include="Metrics.fs" />
         <Compile Include="Stats.fs" />
         <Compile Include="Contracts.fs" />

@@ -401,9 +401,8 @@ type IWorkerPlugin =
     /// </summary>
     /// <param name="sessionInfo">Provides session details about the Scenarios that are scheduled to start</param>
     abstract Start: sessionInfo:SessionStartInfo -> Task
-    
-    abstract GetStats: stats:NodeStats -> Task<DataSet>
-    abstract GetHints: unit -> string[]
+        
+    abstract GetData: stats:NodeStats -> Task<PluginData>
     
     /// <summary>
     /// Ends execution.    

@@ -2,11 +2,9 @@
 
 #nowarn "0044"
 open System
-open System.Data
-open FSharp.Json
+open System.Collections.Generic
 open MessagePack
 open NBomber.Contracts.Metrics
-open NBomber.Contracts.Serialization.JsonTransforms
 
 type ReportFormat =
     | Txt = 0
@@ -179,20 +177,37 @@ type ThresholdResult = {
     IsFailed: bool
 }
 
+type PluginDataTable = {
+    TableName: string    
+    Rows: ResizeArray<Dictionary<string,obj>>
+}
+with
+    [<CompiledName("Create")>]
+    static member create tableName = { TableName = tableName; Rows = ResizeArray() }
+
+type PluginData = {
+    PluginName: string
+    Tables: ResizeArray<PluginDataTable>
+    Hints: ResizeArray<string>
+}
+with
+    [<CompiledName("Create")>]
+    static member create pluginName = { PluginName = pluginName; Tables = ResizeArray(); Hints = ResizeArray(); }
+
 [<CLIMutable; MessagePackObject>]
 type NodeStats = {
     [<Key 0>] ScenarioStats: ScenarioStats[]
     [<Key 1>] Metrics: MetricStats
-    [<IgnoreMember>] Thresholds: ThresholdResult[]
-    [<IgnoreMember>] [<JsonField(Transform=typeof<DateTableTransform>)>] PluginStats: DataSet[]
-    [<Key 2>] NodeInfo: NodeInfo
-    [<Key 3>] TestInfo: TestInfo
+    [<Key 2>] Thresholds: ThresholdResult[]    
+    [<Key 3>] NodeInfo: NodeInfo
+    [<Key 4>] TestInfo: TestInfo    
+    [<Key 5>] AllRequestCount: int
+    [<Key 6>] AllOkCount: int
+    [<Key 7>] AllFailCount: int
+    [<Key 8>] AllBytes: int64
+    [<Key 9>] Duration: TimeSpan
+    [<IgnoreMember>] PluginsData: PluginData[]
     [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 4>] AllRequestCount: int
-    [<Key 5>] AllOkCount: int
-    [<Key 6>] AllFailCount: int
-    [<Key 7>] AllBytes: int64
-    [<Key 8>] Duration: TimeSpan
 }
 with
     [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.ScenarioStats.Get(name)")>]
@@ -206,7 +221,7 @@ with
         ScenarioStats = Array.empty
         Metrics = MetricStats.empty
         Thresholds = Array.empty
-        PluginStats = Array.empty
+        PluginsData = Array.empty
         NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty; ReportFiles = Array.empty
         AllRequestCount = 0; AllOkCount = 0; AllFailCount = 0; AllBytes = 0                
         Duration = TimeSpan.Zero
