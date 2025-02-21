@@ -401,12 +401,15 @@ type IWorkerPlugin =
     /// </summary>
     /// <param name="sessionInfo">Provides session details about the Scenarios that are scheduled to start</param>
     abstract Start: sessionInfo:SessionStartInfo -> Task
-    
-    abstract GetStats: stats:NodeStats -> Task<DataSet>
-    abstract GetHints: unit -> string[]
+        
+    /// <summary>
+    /// Gets plugin data.
+    /// </summary>
+    /// <param name="stats">Final stats data of the finished scenarios.</param>
+    abstract GetData: stats:NodeStats -> Task<PluginData>
     
     /// <summary>
-    /// Ends execution.    
+    /// Stops execution.    
     /// This method can also be used to clean up resources, such as database connections.     
     /// </summary>
     abstract Stop: unit -> Task

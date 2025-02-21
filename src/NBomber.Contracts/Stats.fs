@@ -2,11 +2,9 @@
 
 #nowarn "0044"
 open System
-open System.Data
-open FSharp.Json
+open System.Collections.Generic
 open MessagePack
 open NBomber.Contracts.Metrics
-open NBomber.Contracts.Serialization.JsonTransforms
 
 type ReportFormat =
     | Txt = 0
@@ -164,35 +162,56 @@ with
         |> Array.tryFind(fun x -> x.StepName = stepName)
         |> Option.defaultValue(Unchecked.defaultof<_>)        
 
+[<CLIMutable; MessagePackObject>]
 type ReportFile = {
-    FilePath: string
-    ReportFormat: ReportFormat
-    ReportContent: string
+    [<Key 0>] FilePath: string
+    [<Key 1>] ReportFormat: ReportFormat
+    [<Key 2>] ReportContent: string
 }
 
+[<CLIMutable; MessagePackObject>]
 type ThresholdResult = {
-    ScenarioName: string
-    StepName: string
-    CheckExpression: string
-    ExceptionMsg: string
-    ErrorCount: int
-    IsFailed: bool
+    [<Key 0>] ScenarioName: string
+    [<Key 1>] StepName: string
+    [<Key 2>] CheckExpression: string
+    [<Key 3>] ExceptionMsg: string
+    [<Key 4>] ErrorCount: int
+    [<Key 5>] IsFailed: bool
 }
+
+[<CLIMutable; MessagePackObject>]
+type PluginDataTable = {
+    [<Key 0>] TableName: string
+    [<Key 1>] Rows: ResizeArray<Dictionary<string,obj>>
+}
+with
+    [<CompiledName("Create")>]
+    static member create tableName = { TableName = tableName; Rows = ResizeArray() }
+
+[<CLIMutable; MessagePackObject>]
+type PluginData = {
+    [<Key 0>] PluginName: string
+    [<Key 1>] Tables: ResizeArray<PluginDataTable>
+    [<Key 2>] Hints: ResizeArray<string>
+}
+with
+    [<CompiledName("Create")>]
+    static member create pluginName = { PluginName = pluginName; Tables = ResizeArray(); Hints = ResizeArray(); }
 
 [<CLIMutable; MessagePackObject>]
 type NodeStats = {
     [<Key 0>] ScenarioStats: ScenarioStats[]
     [<Key 1>] Metrics: MetricStats
-    [<IgnoreMember>] Thresholds: ThresholdResult[]
-    [<IgnoreMember>] [<JsonField(Transform=typeof<DateTableTransform>)>] PluginStats: DataSet[]
-    [<Key 2>] NodeInfo: NodeInfo
-    [<Key 3>] TestInfo: TestInfo
-    [<IgnoreMember>] ReportFiles: ReportFile[]
-    [<Key 4>] AllRequestCount: int
-    [<Key 5>] AllOkCount: int
-    [<Key 6>] AllFailCount: int
-    [<Key 7>] AllBytes: int64
-    [<Key 8>] Duration: TimeSpan
+    [<Key 2>] Thresholds: ThresholdResult[]    
+    [<Key 3>] NodeInfo: NodeInfo
+    [<Key 4>] TestInfo: TestInfo    
+    [<Key 5>] AllRequestCount: int
+    [<Key 6>] AllOkCount: int
+    [<Key 7>] AllFailCount: int
+    [<Key 8>] AllBytes: int64
+    [<Key 9>] Duration: TimeSpan
+    [<Key 10>] PluginsData: PluginData[]
+    [<Key 11>] ReportFiles: ReportFile[]
 }
 with
     [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.ScenarioStats.Get(name)")>]
@@ -206,7 +225,7 @@ with
         ScenarioStats = Array.empty
         Metrics = MetricStats.empty
         Thresholds = Array.empty
-        PluginStats = Array.empty
+        PluginsData = Array.empty
         NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty; ReportFiles = Array.empty
         AllRequestCount = 0; AllOkCount = 0; AllFailCount = 0; AllBytes = 0                
         Duration = TimeSpan.Zero
