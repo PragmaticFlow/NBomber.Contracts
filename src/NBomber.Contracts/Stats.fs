@@ -162,33 +162,37 @@ with
         |> Array.tryFind(fun x -> x.StepName = stepName)
         |> Option.defaultValue(Unchecked.defaultof<_>)        
 
+[<CLIMutable; MessagePackObject>]
 type ReportFile = {
-    FilePath: string
-    ReportFormat: ReportFormat
-    ReportContent: string
+    [<Key 0>] FilePath: string
+    [<Key 1>] ReportFormat: ReportFormat
+    [<Key 2>] ReportContent: string
 }
 
+[<CLIMutable; MessagePackObject>]
 type ThresholdResult = {
-    ScenarioName: string
-    StepName: string
-    CheckExpression: string
-    ExceptionMsg: string
-    ErrorCount: int
-    IsFailed: bool
+    [<Key 0>] ScenarioName: string
+    [<Key 1>] StepName: string
+    [<Key 2>] CheckExpression: string
+    [<Key 3>] ExceptionMsg: string
+    [<Key 4>] ErrorCount: int
+    [<Key 5>] IsFailed: bool
 }
 
+[<CLIMutable; MessagePackObject>]
 type PluginDataTable = {
-    TableName: string    
-    Rows: ResizeArray<Dictionary<string,obj>>
+    [<Key 0>] TableName: string
+    [<Key 1>] Rows: ResizeArray<Dictionary<string,obj>>
 }
 with
     [<CompiledName("Create")>]
     static member create tableName = { TableName = tableName; Rows = ResizeArray() }
 
+[<CLIMutable; MessagePackObject>]
 type PluginData = {
-    PluginName: string
-    Tables: ResizeArray<PluginDataTable>
-    Hints: ResizeArray<string>
+    [<Key 0>] PluginName: string
+    [<Key 1>] Tables: ResizeArray<PluginDataTable>
+    [<Key 2>] Hints: ResizeArray<string>
 }
 with
     [<CompiledName("Create")>]
@@ -206,8 +210,8 @@ type NodeStats = {
     [<Key 7>] AllFailCount: int
     [<Key 8>] AllBytes: int64
     [<Key 9>] Duration: TimeSpan
-    [<IgnoreMember>] PluginsData: PluginData[]
-    [<IgnoreMember>] ReportFiles: ReportFile[]
+    [<Key 10>] PluginsData: PluginData[]
+    [<Key 11>] ReportFiles: ReportFile[]
 }
 with
     [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.ScenarioStats.Get(name)")>]
