@@ -1,10 +1,12 @@
 ﻿namespace NBomber.Contracts.Metrics
 
+open System
+
 type GaugeStats = {
     ScenarioName: string
     MetricName: string
     UnitOfMeasure: string
-    Value: float
+    Value: float    
 }
 
 type CounterStats = {
@@ -17,12 +19,14 @@ type CounterStats = {
 type MetricStats = {
     Counters: CounterStats[]
     Gauges: GaugeStats[]
+    Duration: TimeSpan
 }
 with
     [<CompiledName("Empty")>]
     static member empty = {
         Counters = Array.empty
         Gauges = Array.empty
+        Duration = TimeSpan.Zero
     }
   
 /// Represents a counter metric that tracks a cumulative value.  
