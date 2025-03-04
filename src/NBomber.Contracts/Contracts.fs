@@ -423,7 +423,7 @@ type IWorkerPlugin =
     /// Gets plugin data.
     /// </summary>
     /// <param name="stats">Final stats data of the finished scenarios.</param>
-    abstract GetData: stats:NodeStats -> Task<PluginData | null>
+    abstract GetData: stats:NodeStats -> Task<PluginData>
     
     /// <summary>
     /// Stops execution.    
