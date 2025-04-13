@@ -114,7 +114,7 @@ type Response =
         { StatusCode = statusCode
           IsError = false
           SizeBytes = sizeBytes
-          CustomLatencyMs = 0
+          CustomLatencyMs = customLatencyMs
           Message = if isNull message then String.Empty else message
           Payload = None }
 
