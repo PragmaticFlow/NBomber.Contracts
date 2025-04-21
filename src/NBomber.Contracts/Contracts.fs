@@ -2,7 +2,6 @@ namespace NBomber.Contracts
 
 open System
 open System.Collections.Generic
-open System.Data
 open System.Linq.Expressions
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
@@ -12,6 +11,10 @@ open Serilog
 open Microsoft.Extensions.Configuration
 open NBomber.Contracts.Stats
 open NBomber.Contracts.Metrics
+
+/// This exception can be used in cases where a scenario iteration should be excluded from measurement.
+/// This is commonly used for terminating PUSH scenarios that are still waiting for a response, even though the scenario has already been completed.
+exception IgnoreMeasurementException
 
 /// Represents a generic NBomber response interface.
 type IResponse =
