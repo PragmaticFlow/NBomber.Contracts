@@ -90,34 +90,55 @@ type IBaseContext =
     /// Registers a gauge metric.
     abstract RegisterMetric: gauge:IGauge -> unit
 
-/// ScenarioContext represents the execution context of the currently running Scenario.
-/// It provides functionality to log particular events, get information about the test, thread id, scenario copy/instance number, etc.
-/// Also, it provides the option to stop all or particular scenarios manually.
-type IScenarioContext =
-    abstract TestInfo: TestInfo
+/// Represents the execution context of the currently running scenario in NBomber.
+/// Provides utilities to access test metadata, scenario-specific data, logging,
+/// and control over test execution such as stopping scenarios dynamically.
+type IScenarioContext =    
+    /// Gets metadata about the current test session (e.g., test suite, test name, session ID).    
+    abstract TestInfo: TestInfo    
+    /// Gets metadata about the scenario being executed (e.g., scenario name, duration, thread count).
     abstract ScenarioInfo: ScenarioInfo    
-    /// Returns information about the current node, node role, etc.
-    /// For example, you can use it to get node roles: Coordinator, Agent, or SingleNode.
+    /// Gets information about the current NBomber node, including node type (Coordinator, Agent, or SingleNode).    
     abstract NodeInfo: NodeInfo
+    /// Provides a structured logger for writing scenario-specific log messages.
     abstract Logger: ILogger    
-    /// Represent the current Scenario instance invocation number. It starts from 1.
+    /// Represents the invocation number of the current scenario instance.
+    /// Starts at 1 and increments with each new instance execution.
     abstract InvocationNumber: int64    
-    /// A dictionary that stores Scenario instance data and cleans it after Scenario iteration.
-    /// It can be used to share some data between steps.
+    /// A temporary, in-memory dictionary for storing data during a single scenario iteration.
+    /// The data is cleared automatically after each iteration.
+    /// Useful for sharing data between steps within the same iteration.
     abstract Data: Dictionary<string,obj>    
-    /// A dictionary that stores Scenario instance data and keep it for the whole scenario duration.
-    /// It can be used to model Virtual User data that bound to Scenario instance. 
+    /// A dictionary for storing data across the entire lifecycle of the scenario instance.
+    /// Useful for simulating virtual user state, user session data, etc. 
     abstract ScenarioInstanceData: Dictionary<string,obj>    
-    /// Indicates that scenario execution is finished or canceled.
-    /// You can listen to changes via ScenarioCancellationToken.IsCancellationRequested.
+    /// <summary>
+    /// Provides a cancellation token that indicates if the scenario execution has been canceled or finished.
+    /// You can observe <c>IsCancellationRequested</c> to react to cancellation requests.
+    /// </summary>
     abstract ScenarioCancellationToken: CancellationToken
-    /// Represent the basic .NET Random that should be used to introduce dynamic behavior. 
+    /// <summary>
+    /// Provides a .NET <c>System.Random</c> instance for introducing random behavior within scenarios.
+    /// </summary> 
     abstract Random: Random    
-    /// Stops the specified scenario. In the cluster mode, NBomber will stop the specified scenario on all nodes.
+    /// <summary>
+    /// Stops the specified scenario by name.
+    /// In cluster mode, the scenario will be stopped across all nodes.
+    /// </summary>
+    /// <param name="scenarioName">The name of the scenario to stop.</param>
+    /// <param name="reason">A descriptive reason for stopping the scenario.</param>
     abstract StopScenario: scenarioName:string * reason:string -> unit    
-    /// Stops all scenarios. In the cluster mode, NBomber will stop all scenarios on all nodes.
+    /// <summary>
+    /// Stops all running scenarios and terminates the current test session.
+    /// In cluster mode, this command is propagated to all nodes.
+    /// </summary>
+    /// <param name="reason">A descriptive reason for stopping the test.</param>
     abstract StopCurrentTest: reason:string -> unit    
-    /// Returns the current execution time of the Scenario timer.  
+    /// <summary>
+    /// Returns the elapsed time since the scenario timer started.
+    /// Useful for time-based control or custom metrics.
+    /// </summary>
+    /// <returns>The current elapsed time as a <c>TimeSpan</c>.</returns>  
     abstract GetScenarioTimerTime: unit -> TimeSpan
 
 /// Represents a partition of a scenario in a distributed or clustered environment.
@@ -136,31 +157,49 @@ with
     [<CompiledName("Empty")>]
     static member empty = { Number = 1; Count = 1 }
 
-/// Defines the context for initializing a scenario.
-/// Provides access to configuration, logging, and metadata required for setting up and running a scenario.
+/// Defines the context for initializing a scenario in NBomber.
+/// Provides access to configuration, logging, cluster partitioning, and the ability to register custom metrics.
 type IScenarioInitContext =
-    /// Gets current test info
+    /// Gets metadata about the current test session, including session ID, test suite, and test name.
     abstract TestInfo: TestInfo    
-    /// Gets current Scenario info
-    abstract ScenarioInfo: ScenarioInfo    
-    /// Gets current node info
+    /// Gets metadata about the scenario being initialized, such as name, duration, and concurrent copies.
+    abstract ScenarioInfo: ScenarioInfo
+    /// Gets information about the current NBomber node (e.g., role, node ID, processor count).
+    /// Useful for customizing behavior depending on whether the node is a Coordinator, Agent, or SingleNode.
     abstract NodeInfo: NodeInfo    
-    /// Gets Scenario's custom settings from the configuration file
+    /// Gets scenario-level custom settings from the JSON configuration file.
+    /// These settings are scoped to the current scenario and are defined in the config under the scenario's section.
     abstract CustomSettings: IConfiguration    
-    /// Gets Global custom settings from the configuration file
-    abstract GlobalCustomSettings: IConfiguration    
-    /// Gets scenario partition in the cluster.
-    /// In the cluster mode, the Coordinator automatically assigns ScenarioPartition to each Agent that runs the same Scenario. 
+    /// Gets global-level custom settings from the JSON configuration file.
+    /// These settings are shared across all scenarios and defined in the global config section.
+    abstract GlobalCustomSettings: IConfiguration
+    /// Gets the scenario's assigned partition within a cluster.
+    /// In cluster mode, the Coordinator automatically assigns each Agent a partition of the scenario to execute. 
     abstract ScenarioPartition: ScenarioPartition
-    /// NBomber's logger
+    /// Provides a logger instance for writing structured logs during scenario initialization.
     abstract Logger: ILogger    
-    /// Registers a counter metric.
+    /// <summary>
+    /// Registers a custom counter metric that will be tracked during scenario execution.
+    /// Counter metrics can be used to track counts or events over time (e.g., number of logins).
+    /// </summary>
+    /// <param name="counter">The counter metric to register.</param>
     abstract RegisterMetric: counter:ICounter -> unit
-    /// Registers a gauge metric.
+    /// <summary>
+    /// Registers a custom gauge metric that will be tracked during scenario execution.
+    /// Gauge metrics are used to measure values at a specific point in time (e.g., CPU usage, queue size).
+    /// </summary>
+    /// <param name="gauge">The gauge metric to register.</param>
     abstract RegisterMetric: gauge:IGauge -> unit
 
-/// LoadSimulation allows configuring parallelism and workload profiles.
-/// Link for info: https://nbomber.com/docs/nbomber/load-simulation 
+/// <summary>
+/// Represents a load simulation strategy used to configure virtual user concurrency in NBomber.
+/// Load simulations define how many virtual users should be generated and how they behave over time,
+/// such as keeping a constant load, ramping up/down, or injecting users.
+/// </summary>
+/// <remarks>
+/// For detailed guidance and examples, see the official documentation:
+/// https://nbomber.com/docs/nbomber/load-simulation
+/// </remarks> 
 type LoadSimulation =
     
     /// <summary>
@@ -267,10 +306,8 @@ type LoadSimulation =
     /// <param name="during">The duration of load simulation.</param>
     | Pause of during:TimeSpan
 
-/// <summary>
 /// Thresholds are the pass/fail criteria that you define for your test metrics.
 /// The runtime thresholds will be executed periodically to check real-time and final metrics for Scenario and Step.
-/// </summary>
 type Threshold private (stepName: string,
                         checkStep: Expression<Func<StepStats, bool>>,
                         checkScenario: Expression<Func<ScenarioStats, bool>>,
@@ -365,40 +402,49 @@ type SessionStartInfo = {
 /// ReportingSink provides functionality for saving real-time and final statistics.
 type IReportingSink =
     inherit IDisposable
+    /// Gets the name of the reporting sink.    
     abstract SinkName: string
     
     /// <summary>
-    /// Inits ReportingSink.
-    /// Usually, in this method, ReportingSink reads JSON configuration and establishes a connection to reporting data storage.
+    /// Initializes the reporting sink.
+    /// This method is called before the test starts, and is typically used to read configuration settings and establishes a connection to reporting data storage.
     /// </summary>
-    /// <param name="context">Base NBomber execution context. It can be used to get a logger, test info, etc.</param>
-    /// <param name="infraConfig">Represent JSON config for infrastructure.</param>
+    /// <param name="context">Provides access to NBomber's base execution context, including logger, node info, and test metadata.</param>
+    /// <param name="infraConfig">Represents the infrastructure-specific JSON configuration.</param>
     abstract Init: context:IBaseContext * infraConfig:IConfiguration -> Task
     
-    /// <summary>
-    /// Starts execution, signifying the START event of the load test session.    
+    // <summary>
+    /// Starts the reporting sink at the beginning of a test session.
+    /// This method is called at the start of the test and allows the sink to perform any necessary preparations before data collection begins.
     /// </summary>
-    /// <param name="sessionInfo">Provides session details about the Scenarios that are scheduled to start</param>    
+    /// <param name="sessionInfo">Contains metadata about the test session and scenarios that will be executed.</param>   
     abstract Start: sessionInfo:SessionStartInfo -> Task
     
     /// <summary>
-    /// Saves real-time stats data.
-    /// This method will be invoked periodically, by specified ReportingInterval.
+    /// Saves real-time performance statistics during the test run.
+    /// This method is invoked periodically based on the configured <c>ReportingInterval</c> to capture intermediate metrics.
     /// </summary>
     /// <param name="stats">Real-time stats data of the running scenarios.</param>
     abstract SaveRealtimeStats: stats:ScenarioStats[] -> Task
     
     /// <summary>
-    /// Saves final stats data.
-    /// This method will be invoked when the load test is finished.
+    /// Saves custom metrics collected during scenario execution.
+    /// This method is invoked periodically based on the configured <c>ReportingInterval</c>,
+    /// allowing the reporting sink to persist user-defined metrics such as counters, gauges, or other performance indicators.
     /// </summary>
-    /// <param name="stats">Final stats data of the finished scenarios.</param>
-    abstract SaveFinalStats: stats:NodeStats -> Task
+    /// <param name="metrics">A collection of metrics captured during the test session.</param>
+    /// <returns>A task that represents the asynchronous operation of saving the metrics.</returns>
+    abstract SaveRealtimeMetrics: metrics:MetricStats -> Task
     
     /// <summary>
-    /// Ends execution and records a metric representing the STOP event of the load test.    
-    /// This method can also be used to clean up resources, such as database connections. 
-    /// </summary>    
+    /// Saves final aggregated statistics after the test has completed.
+    /// This method is called once at the end of the test session to persist final results.
+    /// </summary>
+    /// <param name="stats">The complete set of final statistics for all executed scenarios.</param>
+    abstract SaveFinalStats: stats:NodeStats -> Task
+
+    /// Stops the reporting sink and releases any held resources (e.g., network or database connections).
+    /// This method is invoked once the test session ends and should perform any necessary cleanup.     
     abstract Stop: unit -> Task
 
 /// WorkerPlugin provides functionality for building background workers.
