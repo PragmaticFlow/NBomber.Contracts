@@ -413,7 +413,7 @@ type IReportingSink =
     /// <param name="infraConfig">Represents the infrastructure-specific JSON configuration.</param>
     abstract Init: context:IBaseContext * infraConfig:IConfiguration -> Task
     
-    // <summary>
+    /// <summary>
     /// Starts the reporting sink at the beginning of a test session.
     /// This method is called at the start of the test and allows the sink to perform any necessary preparations before data collection begins.
     /// </summary>
@@ -480,25 +480,28 @@ type IWorkerPlugin =
     /// </summary>
     abstract Stop: unit -> Task
 
-/// Provides methods for creating metric instances.
+/// Provides methods for creating custom metric instances, such as counters and gauges,
+/// which can be used to track custom performance or business metrics during a test run.
 type Metric =
     
     /// <summary>
     /// Creates a new counter metric.
+    /// A counter is used to track cumulative values, such as the number of successful requests or errors over time.
     /// </summary>
     /// <param name="metricName">The name of the counter metric.</param>
-    /// <param name="unitOfMeasure">The unit of measure for the counter.</param>
-    /// <returns>An instance of <see cref="ICounter"/>.</returns>
+    /// <param name="unitOfMeasure">The unit of measure associated with the counter (e.g., "req", "errors").</param>
+    /// <returns>An instance of <see cref="ICounter"/> that can be incremented during scenario execution.</returns>
     [<CompiledName("CreateCounter")>]
     static member createCounter(metricName, unitOfMeasure) =
         Counter(metricName, unitOfMeasure) :> ICounter
         
     /// <summary>
     /// Creates a new gauge metric.
+    /// A gauge is used to track a current value that can go up or down, such as CPU usage, response time, or active users.
     /// </summary>
     /// <param name="metricName">The name of the gauge metric.</param>
-    /// <param name="unitOfMeasure">The unit of measure for the gauge.</param>
-    /// <returns>An instance of <see cref="IGauge"/>.</returns>            
+    /// <param name="unitOfMeasure">The unit of measure associated with the gauge (e.g., "ms", "users").</param>
+    /// <returns>An instance of <see cref="IGauge"/> that can be updated with values during scenario execution.</returns>            
     [<CompiledName("CreateGauge")>]        
     static member createGauge(metricName, unitOfMeasure) =
         Gauge(metricName, unitOfMeasure) :> IGauge
