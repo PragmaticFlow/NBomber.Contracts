@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <Authors>Anton Moldovan</Authors>
         <Company>NBomber</Company>
-        <Version>6.1.0-beta.8</Version>
+        <Version>6.1.0</Version>
         <Copyright>NBomber@2025</Copyright>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -37,8 +37,8 @@
         <PackageReference Include="FSharp.UMX" Version="1.1.0" />
         <PackageReference Include="MessagePack" Version="2.5.192" />
         <PackageReference Include="MessagePack.FSharpExtensions" Version="4.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.3" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
         <PackageReference Include="Serilog" Version="4.2.0" />                
         <PackageReference Update="FSharp.Core" Version="9.0.300" />
     </ItemGroup>
