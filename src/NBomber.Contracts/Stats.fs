@@ -115,7 +115,8 @@ type StatusCodeStats = {
 /// Useful for analyzing throughput and request distribution across steps or scenarios.
 [<CLIMutable; MessagePackObject>]
 type RequestStats = {
-    /// The number of requests executed during the current duration.    
+    /// The number of requests executed during the current duration.
+    /// In the final statistics, this value will equal TotalCount.
     [<Key 0>] Count: int
     
     /// Total number of requests executed up to the current duration.
