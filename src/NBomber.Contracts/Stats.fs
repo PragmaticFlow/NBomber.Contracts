@@ -115,18 +115,15 @@ type StatusCodeStats = {
 /// Useful for analyzing throughput and request distribution across steps or scenarios.
 [<CLIMutable; MessagePackObject>]
 type RequestStats = {
-    /// The number of requests executed during the current duration.    
+    /// The total number of requests executed.
     [<Key 0>] Count: int
-    
-    /// Total number of requests executed up to the current duration.
-    [<Key 1>] TotalCount: int
     
     /// The number of requests per second (RPS).
     /// Represents the throughput rate of requests during the test.
-    [<Key 2>] RPS: float
+    [<Key 1>] RPS: float
     
     /// The percentage of this request count relative to the total number of requests.    
-    [<Key 3>] mutable Percent: int
+    [<Key 2>] mutable Percent: int
 }
 
 /// Represents the count of requests grouped by latency ranges in milliseconds.
