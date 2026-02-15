@@ -89,6 +89,20 @@ type IBaseContext =
     abstract RegisterMetric: counter:ICounter -> unit
     /// Registers a gauge metric.
     abstract RegisterMetric: gauge:IGauge -> unit
+    /// <summary>
+    /// Stops the specified scenario by name.
+    /// In cluster mode, the scenario will be stopped across all nodes.
+    /// </summary>
+    /// <param name="scenarioName">The name of the scenario to stop.</param>
+    /// <param name="reason">A descriptive reason for stopping the scenario.</param>
+    abstract StopScenario: scenarioName:string * reason:string -> unit    
+    /// <summary>
+    /// Stops all running scenarios and terminates the current test session.
+    /// In cluster mode, this command is propagated to all nodes.
+    /// </summary>
+    /// <param name="reason">A descriptive reason for stopping the test.</param>
+    abstract StopCurrentTest: reason:string -> unit   
+    
 
 /// Represents the execution context of the currently running scenario in NBomber.
 /// Provides utilities to access test metadata, scenario-specific data, logging,
