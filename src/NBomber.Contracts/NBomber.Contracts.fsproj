@@ -18,6 +18,13 @@
         <Title>NBomber.Contracts</Title>        
     </PropertyGroup>
 
+    <PropertyGroup>
+        <NuGetAudit>true</NuGetAudit>
+        <NuGetAuditMode>all</NuGetAuditMode>
+        <NuGetAuditLevel>low</NuGetAuditLevel>
+        <WarningsAsErrors>(WarningsAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904</WarningsAsErrors>
+    </PropertyGroup>
+    
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Metrics.fs" />
@@ -30,7 +37,7 @@
     <ItemGroup>
         <None Include="../../LICENSE" Pack="true" Visible="false" PackagePath="" />
         <None Include="../../assets/nbomber_icon.png" Pack="true" Visible="false" PackagePath="" />        
-    </ItemGroup>
+    </ItemGroup>    
 
     <ItemGroup>        
         <PackageReference Include="FSharp.Json.New" Version="0.5.0" />        
