@@ -116,8 +116,9 @@ type IScenarioContext =
     abstract NodeInfo: NodeInfo
     /// Provides a structured logger for writing scenario-specific log messages.
     abstract Logger: ILogger    
-    /// Represents the invocation number of the current scenario instance.
-    /// Starts at 1 and increments with each new instance execution.
+    /// Represents the sequential invocation number of the Scenario.
+    /// The value starts at 1 and increments for each new invocation.
+    /// The counter is maintained per node and is not synchronized across a cluster.
     abstract InvocationNumber: int64    
     /// A temporary, in-memory dictionary for storing data during a single scenario iteration.
     /// The data is cleared automatically after each iteration.
