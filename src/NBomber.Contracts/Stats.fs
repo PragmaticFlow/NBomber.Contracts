@@ -267,23 +267,32 @@ type ScenarioStats = {
     /// The current operation type for this scenario (e.g., Bombing, Complete).
     [<Key 5>] CurrentOperation: OperationType
     
-    /// Total number of requests made during the scenario execution.
+    /// Total number of requests made during the scenario execution.    
+    [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 6>] AllRequestCount: int
     
-    /// Total number of successful (OK) requests.
+    /// Total number of successful (OK) requests.    
+    [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 7>] AllOkCount: int
     
     /// Total number of failed requests.
+    [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 8>] AllFailCount: int
     
-    /// Total bytes transferred during the scenario execution.
+    /// Total bytes transferred during the scenario execution.    
     [<Key 9>] AllBytes: int64
     
     /// Duration of the scenario execution.
     [<Key 10>] Duration: TimeSpan
-    
+
     /// Index used for sorting scenarios in reports.
-    [<Key 11>] SortIndex: int
+    [<Key 11>] SortIndex: int    
+
+    /// Total RPS across all steps for successful (OK) requests only.
+    [<Key 12>] TotalOkStepsRPS: float
+
+    /// Total RPS across all steps for failed requests only.
+    [<Key 13>] TotalFailStepsRPS: float
 }
 with
     [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.StepStats.Get(name)")>]
@@ -361,15 +370,19 @@ type NodeStats = {
     [<Key 4>] TestInfo: TestInfo
     
     /// Total number of requests executed by the node.
+    [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 5>] AllRequestCount: int
     
     /// Total number of successful (OK) requests.
+    [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 6>] AllOkCount: int
     
     /// Total number of failed requests.
+    [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 7>] AllFailCount: int
     
-    /// Total number of bytes transferred during the test.
+    /// Total number of bytes transferred during the test.    
+    [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 8>] AllBytes: int64
     
     /// Duration of the test execution on this node.
@@ -377,7 +390,7 @@ type NodeStats = {
     
     /// Data collected from plugins used during the test.
     [<Key 10>] PluginsData: PluginData[]
-    
+
     /// References to generated report files related to this node’s test execution.
     [<Key 11>] ReportFiles: ReportFile[]
 }
@@ -395,7 +408,7 @@ with
         Thresholds = Array.empty
         PluginsData = Array.empty
         NodeInfo = NodeInfo.empty; TestInfo = TestInfo.empty; ReportFiles = Array.empty
-        AllRequestCount = 0; AllOkCount = 0; AllFailCount = 0; AllBytes = 0                
+        AllRequestCount = 0; AllOkCount = 0; AllFailCount = 0; AllBytes = 0
         Duration = TimeSpan.Zero
     }
 
