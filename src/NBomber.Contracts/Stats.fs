@@ -212,6 +212,9 @@ type DataTransferStats = {
     
     /// The total number of bytes transferred during the entire measurement period.
     [<Key 8>] AllBytes: int64
+
+    /// The average data transfer throughput during the measurement period, in bytes per second.
+    [<Key 9>] BytesPerSecond: float
 }
 
 [<CLIMutable; MessagePackObject>]
