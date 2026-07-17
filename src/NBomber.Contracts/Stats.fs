@@ -282,7 +282,8 @@ type ScenarioStats = {
     [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 8>] AllFailCount: int
     
-    /// Total bytes transferred during the scenario execution.    
+    /// Total bytes transferred during the scenario execution.
+    [<Obsolete("This property is obsolete. Please use ScenarioStats and StepStats to retrieve this data instead.")>]
     [<Key 9>] AllBytes: int64
     
     /// Duration of the scenario execution.
