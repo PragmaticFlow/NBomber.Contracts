@@ -42,18 +42,49 @@ with
     [<CompiledName("Empty")>]
     static member empty = { SessionId = ""; TestSuite = ""; TestName = ""; ClusterId = ""; Created = DateTime.MinValue }
 
+/// Represents the role that an NBomber node plays during the test execution.
+/// In a single-node test run, the node always has the SingleNode role.
+/// In a distributed (cluster) test run, nodes are split into Coordinator and Agent roles.
 type NodeType =
+    /// The node runs the whole test on its own, without forming a cluster.
+    /// This is the default role for a regular, non-distributed test run.
     | SingleNode
+
+    /// The node that orchestrates a distributed test run.
+    /// It starts the test session, coordinates all agents within the cluster,
+    /// and gathers their statistics to build the final reports.
     | Coordinator
+
+    /// The node that joins a cluster and executes the load assigned to it by the coordinator.
+    /// It sends its statistics to the coordinator during and after the test run.
     | Agent
 
+/// Represents the operation that an NBomber node is currently executing.
+/// It reflects the lifecycle of a test session and is useful for diagnostics,
+/// real-time monitoring, and reporting.
 type OperationType =
+    /// The node is idle: no operation is being executed at the moment.
     | None = 0
+
+    /// The node is initializing the test session: loading configuration, initializing scenarios and plugins.
     | Init = 1
+
+    /// The node is running the warm-up phase to let the system under test and the scenarios reach a steady state.
+    /// Statistics collected during the warm-up are not included in the final reports.
     | WarmUp = 2
+
+    /// The node is running the actual load test and collecting statistics.
     | Bombing = 3
-    | Stop = 4     
+
+    /// The node is stopping the test session: stopping scenarios and disposing resources.
+    /// It can also indicate that the node was stopped earlier than planned,
+    /// usually by an explicit user request (for example, via API or by cancelling the test run).
+    | Stop = 4
+
+    /// The node has finished the test session and all reports are built.
     | Complete = 5
+
+    /// The node has stopped because of an unhandled error during the test session.
     | Error = 6
 
 /// Represents metadata about the NBomber node that is executing the test.
@@ -115,11 +146,19 @@ type StatusCodeStats = {
 /// Useful for analyzing throughput and request distribution across steps or scenarios.
 [<CLIMutable; MessagePackObject>]
 type RequestStats = {
-    /// The total number of requests executed.
+    /// <summary>
+    /// The number of requests executed.
+    /// For <c>StepStats</c>, this is the count of this step only.
+    /// For <c>ScenarioStats</c>, this is the total count across all steps of the scenario.
+    /// </summary>
     [<Key 0>] Count: int
-    
+
+    /// <summary>
     /// The number of requests per second (RPS).
     /// Represents the throughput rate of requests during the test.
+    /// For <c>StepStats</c>, this is the RPS of this step only.
+    /// For <c>ScenarioStats</c>, this is the total RPS across all steps of the scenario.
+    /// </summary>
     [<Key 1>] RPS: float
     
     /// The percentage of this request count relative to the total number of requests.    
@@ -140,80 +179,164 @@ type LatencyCount = {
     [<Key 2>] MoreOrEq1200: int
 }
 
+/// <summary>
 /// Represents a statistical summary of response latencies for a scenario or step.
 /// Used to analyze performance characteristics such as average response time, distribution percentiles.
+/// For <c>StepStats</c>, all values are calculated from the latencies of this step only.
+/// For <c>ScenarioStats</c>, all values are calculated from the latencies of all steps of the scenario combined.
+/// </summary>
 [<CLIMutable; MessagePackObject>]
 type LatencyStats = {
+    /// <summary>
     /// The minimum response time observed during the measurement period, in milliseconds.
+    /// For <c>StepStats</c>, this is the minimum of this step only.
+    /// For <c>ScenarioStats</c>, this is the minimum across all steps of the scenario.
+    /// </summary>
     [<Key 0>] MinMs: float
-    
+
+    /// <summary>
     /// The mean (average) response time, in milliseconds.
+    /// For <c>StepStats</c>, this is the mean of this step only.
+    /// For <c>ScenarioStats</c>, this is the mean across all steps of the scenario.
+    /// </summary>
     [<Key 1>] MeanMs: float
-    
+
+    /// <summary>
     /// The maximum response time observed during the measurement period, in milliseconds.
+    /// For <c>StepStats</c>, this is the maximum of this step only.
+    /// For <c>ScenarioStats</c>, this is the maximum across all steps of the scenario.
+    /// </summary>
     [<Key 2>] MaxMs: float
-    
+
+    /// <summary>
     /// The 50th percentile (median) response time, in milliseconds.
     /// Half of the responses were faster than or equal to this value.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 3>] Percent50: float
-    
+
+    /// <summary>
     /// The 75th percentile response time, in milliseconds.
     /// 75% of responses were faster than or equal to this value.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 4>] Percent75: float
-    
+
+    /// <summary>
     /// The 95th percentile response time, in milliseconds.
     /// 95% of responses were faster than or equal to this value.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 5>] Percent95: float
-    
+
+    /// <summary>
     /// The 99th percentile response time, in milliseconds.
     /// 99% of responses were faster than or equal to this value.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 6>] Percent99: float
-    
+
+    /// <summary>
     /// The standard deviation of response times, in milliseconds.
     /// Indicates the variability or dispersion of latency values.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 7>] StdDev: float
-    
+
+    /// <summary>
     /// Represents the total count of responses grouped by latency ranges.
     /// Useful for understanding how many requests fell into each latency bucket.
+    /// For <c>StepStats</c>, these are the counts of this step only.
+    /// For <c>ScenarioStats</c>, these are the total counts across all steps of the scenario.
+    /// </summary>
     [<Key 8>] LatencyCount: LatencyCount
 }
 
+/// <summary>
 /// Represents statistical information about data transferred (in bytes) during scenario or step execution.
 /// Useful for analyzing the size distribution of response/request payloads over time.
+/// For <c>StepStats</c>, all values are calculated from the transfers of this step only.
+/// For <c>ScenarioStats</c>, all values are calculated from the transfers of all steps of the scenario combined.
+/// </summary>
 [<CLIMutable; MessagePackObject>]
 type DataTransferStats = {
+    /// <summary>
     /// The minimum number of bytes transferred in a single operation.
+    /// For <c>StepStats</c>, this is the minimum of this step only.
+    /// For <c>ScenarioStats</c>, this is the minimum across all steps of the scenario.
+    /// </summary>
     [<Key 0>] MinBytes: int64
-    
+
+    /// <summary>
     /// The average (mean) number of bytes transferred per operation.
+    /// For <c>StepStats</c>, this is the mean of this step only.
+    /// For <c>ScenarioStats</c>, this is the mean across all steps of the scenario.
+    /// </summary>
     [<Key 1>] MeanBytes: int64
-    
+
+    /// <summary>
     /// The maximum number of bytes transferred in a single operation.
+    /// For <c>StepStats</c>, this is the maximum of this step only.
+    /// For <c>ScenarioStats</c>, this is the maximum across all steps of the scenario.
+    /// </summary>
     [<Key 2>] MaxBytes: int64
-    
+
+    /// <summary>
     /// The 50th percentile (median) of transferred bytes.
     /// Half of the transfers were smaller than or equal to this size.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 3>] Percent50: int64
-    
+
+    /// <summary>
     /// The 75th percentile of transferred bytes.
     /// 75% of transfers were smaller than or equal to this size.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 4>] Percent75: int64
-    
+
+    /// <summary>
     /// The 95th percentile of transferred bytes.
     /// 95% of transfers were smaller than or equal to this size.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 5>] Percent95: int64
-    
+
+    /// <summary>
     /// The 99th percentile of transferred bytes.
     /// 99% of transfers were smaller than or equal to this size.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 6>] Percent99: int64
-    
+
+    /// <summary>
     /// The standard deviation of data transferred, showing how much variation exists from the average value.
+    /// For <c>StepStats</c>, this is calculated from this step only.
+    /// For <c>ScenarioStats</c>, this is calculated across all steps of the scenario.
+    /// </summary>
     [<Key 7>] StdDev: float
-    
+
+    /// <summary>
     /// The total number of bytes transferred during the entire measurement period.
+    /// For <c>StepStats</c>, this is the total of this step only.
+    /// For <c>ScenarioStats</c>, this is the total across all steps of the scenario.
+    /// </summary>
     [<Key 8>] AllBytes: int64
 
+    /// <summary>
     /// The average data transfer throughput during the measurement period, in bytes per second.
+    /// For <c>StepStats</c>, this is the throughput of this step only.
+    /// For <c>ScenarioStats</c>, this is the total throughput across all steps of the scenario.
+    /// </summary>
     [<Key 9>] BytesPerSecond: float
 }
 
@@ -290,13 +413,7 @@ type ScenarioStats = {
     [<Key 10>] Duration: TimeSpan
 
     /// Index used for sorting scenarios in reports.
-    [<Key 11>] SortIndex: int    
-
-    /// Total RPS across all steps for successful (OK) requests only.
-    [<Key 12>] TotalOkStepsRPS: float
-
-    /// Total RPS across all steps for failed requests only.
-    [<Key 13>] TotalFailStepsRPS: float
+    [<Key 11>] SortIndex: int
 }
 with
     [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.StepStats.Get(name)")>]
