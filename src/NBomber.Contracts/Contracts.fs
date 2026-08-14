@@ -398,6 +398,7 @@ type ScenarioProps = {
     RestartIterationOnFail: bool
     MaxFailCount: int
     Weight: int option
+    StatsBasedOnIterations: bool
 }
 
 /// Provides details about the Scenario that is scheduled to start.
