@@ -12,35 +12,38 @@ type ReportFormat =
     | Csv = 2
     | Md = 3
 
-/// Represents metadata about the currently executing test session.
-/// This information is useful for logging, reporting, and tracking test runs across environments or clusters.
+/// Represents metadata about the current test session.
 [<CLIMutable; MessagePackObject>]
 type TestInfo = {
-    /// A unique identifier for the current test session.
-    /// It is automatically generated at the start of the test run.
-    /// Also, it can be set by client via API or CLI arguments.
+    /// A unique identifier of the current test session.
+    /// NBomber generates it at the start of the test run.    
     [<Key 0>] SessionId: string
-    
-    /// The name of the test suite to which this test belongs.
-    /// Useful for grouping related tests together in reports or dashboards.
+
+    /// The name of the test suite that contains this test.    
     [<Key 1>] TestSuite: string
-    
-    /// The name of the individual test case.
-    /// Typically used to identify the purpose or scope of the test.
+
+    /// The name of the test case.    
     [<Key 2>] TestName: string
-    
-    /// A unique identifier for the cluster running the test.
-    /// Acts as a namespace or folder or topic name that allows NBomber agents to discover each other 
-    /// and form a virtual cluster during distributed test execution.
-    /// It can be set via JSON Config, API or CLI arguments.  
+
+    /// A unique identifier of the cluster that runs the test.
+    /// It works as a namespace or a topic name.
+    /// NBomber agents use it to find each other and to form a virtual cluster during a distributed test run.
+    /// The default value is empty.
+    /// You can set it via JSON Config, API or CLI arguments.
     [<Key 3>] ClusterId: string
-    
-    /// The UTC timestamp indicating when the test session was created.
-    [<Key 4>] Created: DateTime
+
+    /// A unique identifier of the NBomber Cloud project.
+    [<Key 4>] ProjectId: string
+
+    /// The UTC timestamp that shows when NBomber created the test session.
+    [<Key 5>] Created: DateTime
 }
 with
     [<CompiledName("Empty")>]
-    static member empty = { SessionId = ""; TestSuite = ""; TestName = ""; ClusterId = ""; Created = DateTime.MinValue }
+    static member empty = { 
+        SessionId = ""; TestSuite = ""; TestName = "";
+        ClusterId = ""; ProjectId = ""; Created = DateTime.MinValue 
+    }
 
 /// Represents the role that an NBomber node plays during the test execution.
 /// In a single-node test run, the node always has the SingleNode role.
