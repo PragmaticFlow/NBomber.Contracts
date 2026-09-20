@@ -37,12 +37,16 @@ type TestInfo = {
 
     /// The UTC timestamp that shows when NBomber created the test session.
     [<Key 5>] Created: DateTime
+
+    /// Session-level (global) tags (e.g., env=prod, team=payments).    
+    [<Key 6>] Tags: IReadOnlyDictionary<string,string>
 }
 with
     [<CompiledName("Empty")>]
-    static member empty = { 
+    static member empty = {
         SessionId = ""; TestSuite = ""; TestName = "";
-        ClusterId = ""; ProjectId = ""; Created = DateTime.MinValue 
+        ClusterId = ""; ProjectId = ""; Created = DateTime.MinValue
+        Tags = Map.empty
     }
 
 /// Represents the role that an NBomber node plays during the test execution.
@@ -417,6 +421,9 @@ type ScenarioStats = {
 
     /// Index used for sorting scenarios in reports.
     [<Key 11>] SortIndex: int
+
+    /// Scenario-level tags (e.g., env=prod, team=payments).    
+    [<Key 12>] Tags: IReadOnlyDictionary<string,string>
 }
 with
     [<Obsolete("Please use extension method 'Get(name)' instead. Example: data.StepStats.Get(name)")>]

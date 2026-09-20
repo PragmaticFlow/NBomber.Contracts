@@ -76,6 +76,8 @@ type ScenarioInfo = {
     /// Provides information about the type of the current operation within the scenario.
     /// It can be: WarmUp or Bombing.
     ScenarioOperation: ScenarioOperation
+    /// Scenario tags (e.g., env=prod, team=payments).
+    Tags: IReadOnlyDictionary<string,string>
 }
 
 type IBaseContext =
@@ -399,6 +401,7 @@ type ScenarioProps = {
     MaxFailCount: int
     Weight: int option
     StatsBasedOnIterations: bool
+    Tags: IReadOnlyDictionary<string,string>
 }
 
 /// Provides details about the Scenario that is scheduled to start.

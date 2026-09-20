@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <Authors>Anton Moldovan</Authors>
         <Company>NBomber</Company>
-        <Version>6.4.0-beta.0</Version>
+        <Version>6.4.0-beta.1</Version>
         <Copyright>NBomber@2026</Copyright>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -39,7 +39,7 @@
         <None Include="../../assets/nbomber_icon.png" Pack="true" Visible="false" PackagePath="" />        
     </ItemGroup>    
 
-    <ItemGroup>        
+    <ItemGroup>
         <PackageReference Include="FSharp.Json.New" Version="0.5.0" />        
         <PackageReference Include="FSharp.UMX" Version="1.1.0" />
         <PackageReference Include="MessagePack" Version="2.5.302" />
