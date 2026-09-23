@@ -396,6 +396,13 @@ type ScenarioProps = {
     Run: (IScenarioContext -> Task<IResponse>) option
     WarmUpDuration: TimeSpan option
     LoadSimulations: LoadSimulation list
+    /// <summary>
+    /// Gets load simulations that will be executed during the warm-up phase.
+    /// When it's empty, the warm-up phase reuses LoadSimulations capped by WarmUpDuration.
+    /// When it's not empty, the warm-up phase runs these simulations to their full planned duration and WarmUpDuration is ignored.
+    /// <see href="https://nbomber.com/docs/nbomber/scenario#scenario-warmup">Documentation link</see>
+    /// </summary>
+    WarmUpSimulations: LoadSimulation list
     Thresholds: Threshold list
     RestartIterationOnFail: bool
     MaxFailCount: int
