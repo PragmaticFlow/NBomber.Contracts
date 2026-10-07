@@ -415,6 +415,8 @@ type ScenarioProps = {
 type ScenarioStartInfo = {
     /// Gets Scenario name.
     ScenarioName: string
+    /// Scenario tags (e.g., env=prod, team=payments).
+    Tags: IReadOnlyDictionary<string,string>
     /// Gets Scenario's sorting index. It can be used to order Scenario on UI. 
     SortIndex: int
 }
