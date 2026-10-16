@@ -208,6 +208,57 @@ type IScenarioInitContext =
     /// <param name="gauge">The gauge metric to register.</param>
     abstract RegisterMetric: gauge:IGauge -> unit
 
+/// Settings for load simulations that control the number of virtual users (Scenario instances) during a given duration.
+type VUsSimulation = {
+    /// The number of virtual users (Scenario instances) that run in parallel.
+    VUs: int
+    /// The duration of the load simulation.
+    Duration: TimeSpan
+}
+
+/// Settings for load simulations that control the arrival rate of virtual users (Scenario instances) during a given duration.
+type RateSimulation = {
+    /// The number of virtual users (Scenario instances) injected per TimeUnit.
+    Rate: int
+    /// The duration of the load simulation.
+    Duration: TimeSpan
+    /// Optional period of time to apply the Rate value. The default value is 1 second.
+    /// For example, Rate = 10 with TimeUnit = 1 sec gives 10 virtual users per second.
+    TimeUnit: TimeSpan option
+}
+
+/// Settings for a load simulation that controls a random arrival rate of virtual users (Scenario instances) during a given duration.
+type RandomRateSimulation = {
+    /// The min number of virtual users (Scenario instances) injected per TimeUnit.
+    MinRate: int
+    /// The max number of virtual users (Scenario instances) injected per TimeUnit.
+    MaxRate: int
+    /// The duration of the load simulation.
+    Duration: TimeSpan
+    /// Optional period of time to apply the rate value. The default value is 1 second.
+    /// For example, MinRate = 5, MaxRate = 10 with TimeUnit = 1 sec gives from 5 to 10 virtual users per second.
+    TimeUnit: TimeSpan option
+}
+
+/// Settings for a load simulation where a constant number of virtual users (Scenario instances) execute a total number of iterations.
+type TotalIterationsByVUsSimulation = {
+    /// The number of virtual users (Scenario instances) that run in parallel.
+    VUs: int
+    /// The total number of Scenario iterations, shared across all virtual users.
+    Iterations: int
+}
+
+/// Settings for a load simulation where virtual users (Scenario instances) are injected by rate until a total number of iterations is executed.
+type TotalIterationsByRateSimulation = {
+    /// The number of virtual users (Scenario instances) injected per TimeUnit.
+    Rate: int
+    /// The total number of Scenario iterations, shared across all virtual users.
+    Iterations: int
+    /// Optional period of time to apply the Rate value. The default value is 1 second.
+    /// For example, Rate = 10 with TimeUnit = 1 sec gives 10 virtual users per second.
+    TimeUnit: TimeSpan option
+}
+
 /// <summary>
 /// Represents a load simulation strategy used to configure virtual user concurrency in NBomber.
 /// Load simulations define how many virtual users should be generated and how they behave over time,
@@ -218,7 +269,62 @@ type IScenarioInitContext =
 /// https://nbomber.com/docs/nbomber/load-simulation
 /// </remarks> 
 type LoadSimulation =
-    
+
+    /// <summary>
+    /// Controls the number of virtual users (Scenario instances) that execute as many iterations as possible within a specified duration.
+    /// Each virtual user behaves like a long-running thread that runs continually (by specified duration) and will be destroyed when the current load simulation stops.
+    /// Typically, this simulation type is applied to test closed systems where you have control over the concurrent number (not rate) of users or client connections.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
+    /// </summary>
+    | ConstantVUs of VUsSimulation
+
+    /// <summary>
+    /// Increases or decreases the number of virtual users (Scenario instances) in a linear ramp over a specified duration.
+    /// Each virtual user behaves like a long-running thread that runs continually (by specified duration) and will be destroyed when the current load simulation stops.
+    /// Typically, this simulation type is applied to test closed systems where you have control over the concurrent number (not rate) of users or client connections.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
+    /// </summary>
+    | RampingVUs of VUsSimulation
+
+    /// <summary>
+    /// Controls a constant arrival rate of virtual users (Scenario instances) during a given duration.
+    /// Each Scenario instance behaves like a short-running thread that runs only once and then is destroyed.
+    /// Usually, this simulation type is used to test open systems where you control the arrival rate of users (websites, HTTP API).
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
+    /// </summary>
+    | ConstantRate of RateSimulation
+
+    /// <summary>
+    /// Increases or decreases the arrival rate of virtual users (Scenario instances) in a linear ramp over a given duration.
+    /// Each Scenario instance behaves like a short-running thread that runs only once and then is destroyed.
+    /// Usually, this simulation type is used to test open systems where you control the arrival rate of users (websites, HTTP API).
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
+    /// </summary>
+    | RampingRate of RateSimulation
+
+    /// <summary>
+    /// Controls a random arrival rate (between MinRate and MaxRate) of virtual users (Scenario instances) during a given duration.
+    /// Each Scenario instance behaves like a short-running thread that runs only once and then is destroyed.
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
+    /// </summary>
+    | RandomRate of RandomRateSimulation
+
+    /// <summary>
+    /// Runs a constant number of virtual users (Scenario instances) until the total number of iterations is executed.
+    /// The iterations are shared across all virtual users.
+    /// This simulation must be the last load simulation of the Scenario, and only Pause simulations can be placed before it (to delay the start).
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
+    /// </summary>
+    | TotalIterationsByVUs of TotalIterationsByVUsSimulation
+
+    /// <summary>
+    /// Injects virtual users (Scenario instances) by rate until the total number of iterations is executed.
+    /// Each Scenario instance behaves like a short-running thread that runs only once and then is destroyed.
+    /// This simulation must be the last load simulation of the Scenario, and only Pause simulations can be placed before it (to delay the start).
+    /// Link for info: https://nbomber.com/docs/nbomber/load-simulation
+    /// </summary>
+    | TotalIterationsByRate of TotalIterationsByRateSimulation
+
     /// <summary>
     /// Increases or decreases the number of Scenario copies (virtual users) in a linear ramp over a specified duration.
     /// Each Scenario copy (virtual user) behaves like a long-running thread that runs continuously (by specified duration) and will be destroyed when the current load simulation stops.
@@ -229,7 +335,8 @@ type LoadSimulation =
     /// </summary>
     /// <param name="copies">The number of concurrent Scenario copies that will be running in parallel.</param>
     /// <param name="during">The duration of load simulation.</param>
-    | RampingConstant of copies:int * during:TimeSpan
+    | [<Obsolete("Use RampingVUs instead.")>]
+      RampingConstant of copies:int * during:TimeSpan
     
     /// <summary>
     /// Maintains a constant number of activated (constantly running) Scenario copies (virtual users) that execute as many iterations as possible within a specified duration.
@@ -241,7 +348,8 @@ type LoadSimulation =
     /// </summary>
     /// <param name="copies">The number of concurrent Scenario copies that will be running in parallel.</param>
     /// <param name="during">The duration of load simulation.</param>
-    | KeepConstant of copies:int * during:TimeSpan
+    | [<Obsolete("Use ConstantVUs instead.")>]
+      KeepConstant of copies:int * during:TimeSpan
     
     /// <summary>
     /// Maintains a constant number of activated (constantly running) Scenario copies (virtual users), which continue executing until a specified iteration count is reached.
@@ -255,7 +363,8 @@ type LoadSimulation =
     /// </summary>
     /// <param name="copies">The number of concurrent Scenario copies that will be running in parallel.</param>
     /// <param name="iterations">Total number of Scenario iterations to execute across all Scenario copies.</param>    
-    | IterationsForConstant of copies:int * iterations:int
+    | [<Obsolete("Use TotalIterationsByVUs instead.")>]
+      IterationsForConstant of copies:int * iterations:int
     
     /// <summary>
     /// Injects a given number of Scenario copies (virtual users) by rate until a specified iteration count.
@@ -270,7 +379,8 @@ type LoadSimulation =
     /// <param name="rate">The injection rate of Scenario copies. It configures how many concurrent copies will be injected at a time.</param>
     /// <param name="interval">The injection interval. It configures the interval between injections. </param>
     /// <param name="iterations">Total number of Scenario iterations to execute across all Scenario copies.</param>   
-    | IterationsForInject of rate:int * interval:TimeSpan * iterations:int
+    | [<Obsolete("Use TotalIterationsByRate instead.")>]
+      IterationsForInject of rate:int * interval:TimeSpan * iterations:int
     
     /// <summary>
     /// Injects a given number of Scenario copies (virtual users) by rate with a linear ramp over a given duration.
@@ -284,7 +394,8 @@ type LoadSimulation =
     /// <param name="rate">The injection rate of Scenario copies. It configures how many concurrent copies will be injected at a time.</param>
     /// <param name="interval">The injection interval. It configures the interval between injections. </param>
     /// <param name="during">The duration of load simulation.</param>
-    | RampingInject of rate:int * interval:TimeSpan * during:TimeSpan
+    | [<Obsolete("Use RampingRate instead.")>]
+      RampingInject of rate:int * interval:TimeSpan * during:TimeSpan
     
     /// <summary>
     /// Injects a given number of Scenario copies (virtual users) by rate during a given duration.
@@ -298,7 +409,8 @@ type LoadSimulation =
     /// <param name="rate">The injection rate of Scenario copies. It configures how many concurrent copies will be injected at a time.</param>
     /// <param name="interval">The injection interval. It configures the interval between injections. </param>
     /// <param name="during">The duration of load simulation.</param>   
-    | Inject of rate:int * interval:TimeSpan * during:TimeSpan
+    | [<Obsolete("Use ConstantRate instead.")>]
+      Inject of rate:int * interval:TimeSpan * during:TimeSpan
     
     /// <summary>
     /// Injects a given random number of Scenario copies (virtual users) by rate during a given duration.
@@ -313,7 +425,8 @@ type LoadSimulation =
     /// <param name="maxRate">The max injection rate of Scenario copies.</param>
     /// <param name="interval">The injection interval. It configures the interval between injections.</param>
     /// <param name="during">The duration of load simulation.</param>
-    | InjectRandom of minRate:int * maxRate:int * interval:TimeSpan * during:TimeSpan
+    | [<Obsolete("Use RandomRate instead.")>]
+      InjectRandom of minRate:int * maxRate:int * interval:TimeSpan * during:TimeSpan
     
     /// <summary>
     /// Introduces Scenario pause simulation for a given duration.
