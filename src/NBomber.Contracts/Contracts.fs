@@ -576,7 +576,16 @@ type IReportingSink =
     /// <param name="metrics">A collection of metrics captured during the test session.</param>
     /// <returns>A task that represents the asynchronous operation of saving the metrics.</returns>
     abstract SaveRealtimeMetrics: metrics:MetricStats -> Task
-    
+
+    /// <summary>
+    /// Saves the results of runtime threshold checks during the test run.
+    /// This method is invoked periodically based on the configured <c>ReportingInterval</c>,
+    /// only when one or more thresholds failed in the current interval.
+    /// </summary>
+    /// <param name="thresholds">Thresholds that failed in the current interval.</param>
+    /// <returns>A task that represents the asynchronous operation of saving the thresholds.</returns>
+    abstract SaveRealtimeThresholds: thresholds:ThresholdStats[] -> Task
+
     /// <summary>
     /// Saves final aggregated statistics after the test has completed.
     /// This method is called once at the end of the test session to persist final results.

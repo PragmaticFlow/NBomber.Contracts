@@ -462,6 +462,25 @@ type ThresholdResult = {
     [<Key 5>] IsFailed: bool
 }
 
+/// Represents the result of a runtime threshold check at a reporting interval.
+[<CLIMutable; MessagePackObject>]
+type ThresholdStats = {
+    /// The name of the scenario that the threshold belongs to.
+    [<Key 0>] ScenarioName: string
+
+    /// The name of the step that the threshold checks. It is empty for scenario and metric thresholds.
+    [<Key 1>] StepName: string
+
+    /// The threshold check expression.
+    [<Key 2>] CheckExpression: string
+
+    /// Indicates whether the threshold check failed.
+    [<Key 3>] IsFailed: bool
+
+    /// The test duration at which the threshold was checked.
+    [<Key 4>] Duration: TimeSpan
+}
+
 [<CLIMutable; MessagePackObject>]
 type PluginDataTable = {
     [<Key 0>] TableName: string
