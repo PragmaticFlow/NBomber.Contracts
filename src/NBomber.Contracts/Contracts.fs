@@ -579,8 +579,7 @@ type IReportingSink =
 
     /// <summary>
     /// Saves the results of runtime threshold checks during the test run.
-    /// This method is invoked periodically based on the configured <c>ReportingInterval</c>,
-    /// only when one or more thresholds failed in the current interval.
+    /// This method is invoked periodically based on the configured <c>ReportingInterval</c>.    
     /// </summary>
     /// <param name="thresholds">Thresholds that failed in the current interval.</param>
     /// <returns>A task that represents the asynchronous operation of saving the thresholds.</returns>
