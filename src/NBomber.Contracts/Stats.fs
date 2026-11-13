@@ -460,6 +460,7 @@ type ThresholdResult = {
     [<Key 3>] ExceptionMsg: string
     [<Key 4>] ErrorCount: int
     [<Key 5>] IsFailed: bool
+    [<Key 6>] ErrorsTimeline: TimeSpan[]
 }
 
 /// Represents the result of a runtime threshold check at a reporting interval.
